@@ -1,7 +1,6 @@
 ---
 layout: page
 title: A while back
-permalink: /history
 menus: navigation
 ---
 
