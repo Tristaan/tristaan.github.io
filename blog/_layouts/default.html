@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+    {%- include head.html -%}
+    <body>
+        <main id="layout">
+            <a id="menuLink" class="menu-toggle" href="#menu">
+                <span></span>
+            </a>
+            <div id="menu">
+            {%- include menu.html -%}
+            </div>
+            <div id="main">
+                {{ content }}
+            </div>
+        </main>
+        <script>
+menuLink.onclick=function(a){a.preventDefault();var e="active";layout.className=layout.className==e?"":e};
+        </script>
+    </body>
+</html>

@@ -1,0 +1,47 @@
+<nav class="pure-menu">
+    <a class="pure-menu-heading" rel="author" href="{{ "/" | relative_url }}">
+        {{ site.title | escape }}
+        <div>insmod, dmesg, rmmod</div>
+    </a>
+    <ul class="pure-menu-list">
+        {% for item in site.menus.navigation %}
+            <li class="pure-menu-item item-{{ loop.index }}">
+                <a class="pure-menu-link"
+                   href="{{ item.url }}"
+                   title="Go to {{ item.title }}">
+                    <i class="fas fa-caret-right"></i>
+                    {{ item.title }}
+                </a>
+                {% if item.children %}
+                    <ul class="sub-menu">
+                        {% for item in item.children %}
+                            <li class="item-{{ loop.index }}">
+                                <a href="{{ item.url }}" title="Go to {{ item.title }}">{{ item.title }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</nav>
+<footer class="">
+    <data class="" href="{{ "/" | relative_url }}"></data>
+
+    {%- if site.email -%}
+    <a class="contact" href="mailto:{{ site.email }}">Contact us!</a>
+    {%- endif -%}
+
+    <span class="copyright">
+        <i class="far fa-copyright"></i>
+        {%- if site.author -%}
+        {{ site.author | escape }}
+        {%- else -%}
+        {{ site.title | escape }}
+        {%- endif -%}
+    </span>
+
+</footer>
+{%- assign default_paths = site.pages | map: "path" -%}
+{%- assign page_paths = site.header_pages | default: default_paths -%}
+
