@@ -4,7 +4,6 @@ title: A while back
 menus: navigation
 ---
 
-## The hated
 While visiting high school I wrote some example code in **C++**. It is not some advanced code magic but it is something to start with.
 TODO: comments
 

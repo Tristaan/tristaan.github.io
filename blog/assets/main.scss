@@ -202,9 +202,12 @@ body{
 }
 // Post List //
 .post-list {
-    list-style: none;
     padding: 0 1em;
+    list-style-type: square;
     li {
+        p {
+            margin-top: 0;
+        }
         .meta {
             float: right;
             font-size: 0.8em;

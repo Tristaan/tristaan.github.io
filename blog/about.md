@@ -1,7 +1,7 @@
 ---
 layout: page
 title: About
-subtitle: Nice to share all your ware!
+subtitle: No brains, no tumors
 menus: navigation
 ---
 

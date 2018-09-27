@@ -5,7 +5,7 @@ categories: [sensors, electronics]
 tags: [arduino, monitoring]
 ---
 
-This project started out as a small test if it's even possible to read sensor data into a MVC app like there are [ThingsBoard](https://thingsboard.io/), [ThingSoeak](https://thingspeak.com/) and many more. To tune this for your own station, you need to understand a bit about **Ruby on Rails** and **Arduino**.
+This project started out as a small test if it's even possible to read sensor data into a MVC app like there are [ThingsBoard](https://thingsboard.io/), [ThingSpeak](https://thingspeak.com/) and many more. To tune this for your own station, you need to understand a bit about **Ruby on Rails** and **Arduino**.
 
 Get the sauce here:
 ```
@@ -23,7 +23,6 @@ The controllers and views are just for showing the data in a pretty way with gra
 
 All the additional data sent from then on are snesor readings sent by whatever interval you set.
 
-But as you'd expect I found many shortcommings from this kind of sensor access.
-First I needed to fill half of the arduinos flash with a json library.
-Then I needed to create a connection from the application which wasn't a seamless experience. The connection was breaking randomly, but it was once a week at most. To set up the connection I needed to time the script and arduino connection just right because it connected over bluetooth.
-Arduino -> Bluetooth -> Serial -> Application
+But as you'd expect I found many shortcomings from this kind of sensor access.
+Watch that you have enough flash space on your microcontroller.
+Then I needed to create a connection from the application which wasn't a seamless experience. The connection was breaking randomly, but it was once a week at most. To set up the connection I needed to time the script and arduino connection just right because it connected over bluetooth and there were some implications.
