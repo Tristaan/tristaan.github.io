@@ -215,6 +215,7 @@ input, select, textarea {
 
 		background: #348cb2 url("images/robo_bg.jpg") center;
 		background-repeat: no-repeat;
+        background-size: cover;
 		height: 100%;
 		width: 100%;
 		top: 0;

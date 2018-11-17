@@ -1,6 +1,6 @@
 ---
 layout: page
-title: A while back
+title: Some history
 menus: navigation
 ---
 

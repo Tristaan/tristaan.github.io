@@ -4,6 +4,6 @@
 
 layout: home
 title: Projects
-menus: navigation
+menus:
 ---
 
