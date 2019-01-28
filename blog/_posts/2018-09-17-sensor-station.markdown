@@ -25,4 +25,5 @@ All the additional data sent from then on are snesor readings sent by whatever i
 
 But as you'd expect I found many shortcomings from this kind of sensor access.
 I needed to create a connection from the application which wasn't a seamless experience. The connection was breaking randomly, but it was once a week at most. To set up the connection I needed to time the script and arduino connection just right because it connected over bluetooth and there were some implications.
-This is fixable by modifiying the arduino code and make it wait until the connection is not fully set up.
+This is fixable by modifiying the arduino code and make it wait until the connection is not fully set up. But i just wanted to make it work.
+In the future, this project might be revisited.
