@@ -1,10 +1,19 @@
 ---
 layout: page
 title: About
-subtitle: If it ain't broke, I can fix it.
+subtitle: If it ain't broke, I can fix it!
 menus: navigation
 ---
-Check out my online accounts for some code I wrote:
+
+Hello,
+my name is Tristan Šneider and I come from Slovenia. My primary occupation is system administration, but I am also quite active in the fields of programming and handymanning for not-so-lucky locals around my place. Currenlty I study for my electrical engineering degree, which is taking forever because there's always something else to do, but hey I don't plan on killing myself soon. :D
+
+If you are working on projects that are somewhat similar to mine, or you deem them similar to mine and you need help with them. Don't be afraid to drop me a [mail](mailto:tristan@sneider.si). I offer my services to anyone if I can find the time.
+
+Well, now that you know my mail, drop one whenever you want and help me fill this website with more content for people to read!
+
+### Look at some of my online footprints below:
+
 * [Github](https://github.com/tristaan)
 * [Bitbucket](https://bitbucket.org/Tristan_)
 * [LinkedIn](https://www.linkedin.com/in/tristan-%C5%A1neider-66b859158/)
@@ -12,3 +21,10 @@ Check out my online accounts for some code I wrote:
 I'm currently maintaining:
 * [medico.health](https://beta.medico.health)
 * [rineja.si](https://www.rineja.si)
+
+If you find any *bugs* or can recommend *improvements*, **drop me a message**.
+
+Enjoy and have a great time whenever,
+
+--
+Tristan
