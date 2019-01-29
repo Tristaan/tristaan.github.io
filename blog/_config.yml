@@ -22,7 +22,6 @@ url: "https://sneider.si" # the base hostname & protocol for your site, e.g. htt
 author: tristan
 logo: /assets/logo_wide.png
 image: /assets/logo_wide.png
-lang: en_SI
 
 twitter:
   username: sneider_si
