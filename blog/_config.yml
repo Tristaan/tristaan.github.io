@@ -14,13 +14,35 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: sneider.si
-email: info@sneider.si
+email: tristan@sneider.si
 description: >- # this means to ignore newlines until "baseurl:"
   Find some nifty guides, rants and information about a computer service provider.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://sneider.si" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: sneider_si
-github_username:  tristaan
+author: tristan
+logo: /assets/logo_wide.png
+image: /assets/logo_wide.png
+lang: en_SI
+
+twitter:
+  username: sneider_si
+  card: summary
+facebook:
+  publisher: Tristan.sneider
+  admins: Tristan.sneider
+
+social:
+  name: Tristan Šneider
+  links:
+    - https://twitter.com/sneider_si
+    - https://www.facebook.com/Tristan.sneider
+    - https://github.com/tristaan
+    - https://bitbucket.org/Tristan_
+    - https://www.linkedin.com/in/tristan-%C5%A1neider-66b859158/
+
+webmaster_verifications:
+  google: 8kBL7vAyL-pacXh9wYFQbA2HlYSs2WWmtA5UyRwK_s8
+
 
 date_format: "%d.%m.%Y, %a"
 show_excerpts: true
