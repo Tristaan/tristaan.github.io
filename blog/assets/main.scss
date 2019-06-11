@@ -17,10 +17,14 @@ $less_white: rgba(175,175,175,1);
 $content_width: 900px;
 $menu_width: 250px;
 $break_1: 54em;
+$break_2: 30em;
 
 // Default styles //
 a{
     color: $purple_taupe;
+}
+p{
+    padding-left: 0.5em;
 }
 code{
     font-family: 'Cutive Mono';
@@ -40,14 +44,25 @@ html{
 }
 body{
 }
+.pure-u {
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
 #layout{
+    position: relative;
     left:0;
     padding-left: 0;
+    min-height: 100%;
+    transition: left 0.5s;
+    #menu {
+        transition: left 0.5s, width 0.5s;
+    }
     @media (min-width: $break_1){
         padding-left: $menu-width;
     }
 
     .menu-toggle{
+        transition: left 0.5s;
         position: fixed;
         display: block;
         top: 0;
@@ -96,21 +111,53 @@ body{
             left: $menu_width;
         }
     }
-
+    &.active {
+        @media (max-width: $break_1) {
+            left: $menu_width;
+        }
+        .menu-toggle{
+            left: $menu_width;
+        }
+        #menu{
+            left: $menu_width;
+            width: $menu_width;
+        }
+    }
     #main{
         padding: 10px;
     }
-}
-#layout.active {
-    @media (max-width: $break_1) {
-        position: relative;
-        left: $menu_width;
-    }
-    .menu-toggle{ left: $menu_width;
-    }
-    #menu{
-        left: $menu_width;
-        width: $menu_width;
+    #donate{
+        .pure-button {
+            float: right;
+            padding: 0.15em 0.3em;
+            display: none;
+        }
+        &.active{
+            display: block;
+        }
+        background: #FFF;
+        display: none;
+        padding: 0.5em;
+        @media (min-width: $break_1){
+            border: 1px solid $more_white;
+            border-radius: 3px;
+            position: fixed;
+            right: 1.2em;
+            bottom: 1.2em;
+            .pure-button {
+                display: block;
+            }
+        }
+        @media (max-width: $break_1){
+            .pure-g {
+                flex: 1;
+                justify-content: center;
+                vertical-align: middle;
+            }
+        }
+        @media (max-width: $break_2){
+            font-size: 0.6em;
+        }
     }
 }
 // Menu //
@@ -186,6 +233,40 @@ body{
             color: $less_white;
             font-weight: 600;
             text-decoration: underline;
+        }
+    }
+}
+// Gaming //
+#ts3-status{
+    table {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        h4 {
+            margin: 0;
+        }
+        tr {
+            border-collapse: collapse;
+            td {
+                border-top: 1px solid $less_white;
+                padding: 5px;
+            }
+            td:nth-child(2){
+                text-align: center;
+            }
+        }
+    }
+    #status {
+        span {
+            padding: 3px;
+            border-radius: 3px;
+        }
+        .on {
+            color: $med_turqoise;
+            background: $blue_yonder;
+        }
+        .off {
+            color: $less_white;
+            background: $gunmetal;
         }
     }
 }

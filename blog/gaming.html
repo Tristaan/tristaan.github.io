@@ -1,0 +1,67 @@
+---
+layout: page
+title: Gaming
+subtitle: my involvement in gaming
+menus: navigation
+---
+<div class="pure-g">
+    <div id="ts3-status" class="pure-u pure-u-sm-1 pure-u-md-2-5 pure-u-8-24">
+        <table>
+            <tr> <th colspan="2"> <h4>TeamSpeak 3 server status</h4> </th> </tr>
+            <tr>
+                <td>Address: </td> <td id="address"></td>
+            </tr>
+            <tr>
+                <td>Status: </td> <td id="status"></td>
+            </tr>
+            <tr>
+                <td>IP: </td> <td id="ip"></td>
+            </tr>
+            <tr>
+                <td>Version: </td> <td id="version"></td>
+            </tr>
+            <tr>
+                <td>Blacklist: </td> <td id="blacklist"></td>
+            </tr>
+            <tr>
+                <td>Connect: </td> <td id="connect"><a href="ts3server://sneider.si?">TTD</a></td>
+            </tr>
+        </table>
+        <small><strong>Wait a second for the status to load.</strong></small>
+    </div>
+    <div class="pure-u pure-u-sm-1 pure-u-md-3-5 pure-u-16-24">
+        <ul>
+            <li><a href="https://spid.si/">Spid.si - The slovenian gamer community</a></li>
+            <li><a href="https://gamevan.eu/">Gamevan - A van which ain't empty inside</a></li>
+        </ul>
+        <p>Content coming soon</p>
+    </div>
+</div>
+<script
+    src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function(){
+        jQuery.getJSON("https://api.cleanvoice.ru/ts3/?address=sneider.si:9987&ext=true&callback=?", function( data ) {
+            var online = ['', ''];
+            online[1] = "<span class='on'>ONLINE</span>";
+            online[0] = "<span class='off'>OFFLINE</span>";
+            var power = data["can_connect"] ? 1 : 0;
+            $('#address').text(data["address"]);
+            $('#status').html(online[power]);
+            $('#ip').text(data["resolved_ip"]);
+            $('#version').text(data["version"]["version"]);
+            var bl = data["blacklist"];
+            if(bl == 0) {
+                $('#blacklist').text("WHITELISTED");
+            } else {
+                $('#blacklist').text("BLACKLISTED");
+            }
+
+        });
+
+        var link = "ts3server://sneider.si/?port=9987&nickname=" + Math.random().toString(36).substring(7);
+        $('#connect a').attr("href", link);
+    });
+</script>

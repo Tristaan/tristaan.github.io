@@ -18,12 +18,6 @@ Well, now that you know my mail, drop one whenever you want and help me fill thi
 * [Bitbucket](https://bitbucket.org/Tristan_)
 * [LinkedIn](https://www.linkedin.com/in/tristan-%C5%A1neider-66b859158/)
 
-I'm currently maintaining:
-* [medico.health](https://beta.medico.health)
-* [rineja.si](https://www.rineja.si)
-
-If you find any *bugs* or can recommend *improvements*, **drop me a message**.
-
 Enjoy and have a great time whenever,
 
 --
