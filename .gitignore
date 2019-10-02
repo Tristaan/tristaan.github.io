@@ -1,3 +1,4 @@
-blog/_site
-blog/.sass-cache
-blog/.jekyll-metadata
+_site
+.sass-cache
+.jekyll-metadata
+node_modules
