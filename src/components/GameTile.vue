@@ -1,5 +1,6 @@
 <template>
-  <div :style="'background-image: url('+cover.replace('t_thumb', 't_cover_big')+')'" class="pure-u-4-24 game-tile">
+  <div :style="'background-image: url('+cover.replace('t_thumb', 't_cover_big')+')'"
+    class="pure-u-1 pure-u-sm-1-2 pure-u-lg-1-3 pure-u-xl-1-4 game-tile">
     <div class="game-data">
       <div class="p-1">
         <h3> {{name}} </h3>
@@ -99,6 +100,9 @@ export default {
   height: 500px;
   background-size: cover;
   position: relative;
+  @media (min-width: 1920px) {
+    width: 16.6666667%;
+  }
   .game-data {
     overflow: hidden;
     position: relative;

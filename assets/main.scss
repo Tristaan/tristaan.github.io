@@ -21,294 +21,297 @@ $break_2: 30em;
 
 // Default styles //
 a{
-    color: $purple_taupe;
+  color: $purple_taupe;
 }
 p{
-    padding-left: 0.5em;
+  padding-left: 0.5em;
 }
 code{
-    font-family: 'Cutive Mono';
+  font-family: 'Cutive Mono';
 }
 code.highlighter-rouge{
-    background: $more_white;
-    border-radius: 4px;
-    border: 1px solid $white;
+  background: $more_white;
+  border-radius: 4px;
+  border: 1px solid $white;
 }
 .far, .fas {
-    margin-right: 5px;
+  margin-right: 5px;
 }
 // Layout //
 html{
-    min-height: 100%;
-    font-family: 'Montserrat';
+  min-height: 100%;
+  font-family: 'Montserrat';
 }
 body{
 }
 .pure-u {
-    padding: 0.5rem;
-    box-sizing: border-box;
+  padding: 0.5rem;
+  box-sizing: border-box;
 }
 #layout{
-    position: relative;
-    left:0;
-    padding-left: 0;
-    min-height: 100%;
+  position: relative;
+  left:0;
+  padding-left: 0;
+  min-height: 100%;
+  transition: left 0.5s;
+  #menu {
+    transition: left 0.5s, width 0.5s;
+  }
+  @media (min-width: $break_1){
+    padding-left: $menu-width;
+  }
+
+  .menu-toggle{
     transition: left 0.5s;
-    #menu {
-        transition: left 0.5s, width 0.5s;
-    }
+    position: fixed;
+    display: block;
+    top: 0;
+    left: 0;
+    background: rgba(0,0,0,0.7);
+    font-size: 10px;
+    z-index: 10;
+    width: 2em;
+    height: auto;
+    padding: 2.1em 1.6em;
     @media (min-width: $break_1){
-        padding-left: $menu-width;
+      position: fixed;
+      left: 220px;
+      display: none;
     }
+    span{
+      position: relative;
+      display: block;
+      &, &::before, &::after{
+        background-color: $more_white;
+        width: 100%;
+        height: 0.2em;
+      }
+      &::before, &::after{
+        position: absolute;
+        margin-top: -0.6em;
+        content: " ";
+      }
+      &::after{
+        margin-top: 0.6em;
+      }
+    }
+  }
 
+  #menu{
+    position: fixed;
+    width: $menu_width;
+    margin-left: -$menu_width;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    @media (min-width: $break_1) {
+      left: $menu_width;
+    }
+  }
+  &.active {
+    @media (max-width: $break_1) {
+      left: $menu_width;
+    }
     .menu-toggle{
-        transition: left 0.5s;
-        position: fixed;
-        display: block;
-        top: 0;
-        left: 0;
-        background: rgba(0,0,0,0.7);
-        font-size: 10px;
-        z-index: 10;
-        width: 2em;
-        height: auto;
-        padding: 2.1em 1.6em;
-        @media (min-width: $break_1){
-            position: fixed;
-            left: 220px;
-            display: none;
-        }
-        span{
-            position: relative;
-            display: block;
-            &, &::before, &::after{
-                background-color: $more_white;
-                width: 100%;
-                height: 0.2em;
-            }
-            &::before, &::after{
-                position: absolute;
-                margin-top: -0.6em;
-                content: " ";
-            }
-            &::after{
-                margin-top: 0.6em;
-            }
-        }
+      left: $menu_width;
     }
-
     #menu{
-        position: fixed;
-        width: $menu_width;
-        margin-left: -$menu_width;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        @media (min-width: $break_1) {
-            left: $menu_width;
-        }
+      left: $menu_width;
+      width: $menu_width;
     }
-    &.active {
-        @media (max-width: $break_1) {
-            left: $menu_width;
-        }
-        .menu-toggle{
-            left: $menu_width;
-        }
-        #menu{
-            left: $menu_width;
-            width: $menu_width;
-        }
+  }
+  #main{
+    padding: 10px;
+  }
+  #donate{
+    @media (min-width: $break_1){
+      z-index: 999;
     }
-    #main{
-        padding: 10px;
+    .pure-button {
+      float: right;
+      padding: 0.15em 0.3em;
+      display: none;
     }
-    #donate{
-        .pure-button {
-            float: right;
-            padding: 0.15em 0.3em;
-            display: none;
-        }
-        &.active{
-            display: block;
-        }
-        background: #FFF;
-        display: none;
-        padding: 0.5em;
-        @media (min-width: $break_1){
-            border: 1px solid $more_white;
-            border-radius: 3px;
-            position: fixed;
-            right: 1.2em;
-            bottom: 1.2em;
-            .pure-button {
-                display: block;
-            }
-        }
-        @media (max-width: $break_1){
-            .pure-g {
-                flex: 1;
-                justify-content: center;
-                vertical-align: middle;
-            }
-        }
-        @media (max-width: $break_2){
-            font-size: 0.6em;
-        }
+    &.active{
+      display: block;
     }
+    background: #FFF;
+    display: none;
+    padding: 0.5em;
+    @media (min-width: $break_1){
+      border: 1px solid $more_white;
+      border-radius: 3px;
+      position: fixed;
+      right: 1.2em;
+      bottom: 1.2em;
+      .pure-button {
+        display: block;
+      }
+    }
+    @media (max-width: $break_1){
+      .pure-g {
+        flex: 1;
+        justify-content: center;
+        vertical-align: middle;
+      }
+    }
+    @media (max-width: $break_2){
+      font-size: 0.6em;
+    }
+  }
 }
 // Menu //
 #menu{
-    background: $gunmetal;
-    .pure-menu-heading{
-        font-family: 'Zilla Slab';
-        font-size: 2rem;
-        background: $independence;
-        color: $more_white;
-        text-align: center;
-        border-bottom: 2px solid $white;
-        text-transform: lowercase;
-        div{
-            font-family: 'Montserrat';
-            font-size: 0.4em;
-            font-weight: initial;
-            color: $med_turqoise;
-            text-align: center;
-        }
+  background: $gunmetal;
+  .pure-menu-heading{
+    font-family: 'Zilla Slab';
+    font-size: 2rem;
+    background: $independence;
+    color: $more_white;
+    text-align: center;
+    border-bottom: 2px solid $white;
+    text-transform: lowercase;
+    div{
+      font-family: 'Montserrat';
+      font-size: 0.4em;
+      font-weight: initial;
+      color: $med_turqoise;
+      text-align: center;
     }
-    // Menu List //
-    .pure-menu-list{
-        font-size: 1.1rem;
-        .pure-menu-item{
-            border-bottom: 1px solid $less_white;
-            .pure-menu-link{
-                padding-left: 2rem;
-                color: $blue_yonder;
-                &:hover{
-                    background-color: $independence;
-                    color: $white;
-                }
-            }
+  }
+  // Menu List //
+  .pure-menu-list{
+    font-size: 1.1rem;
+    .pure-menu-item{
+      border-bottom: 1px solid $less_white;
+      .pure-menu-link{
+        padding-left: 2rem;
+        color: $blue_yonder;
+        &:hover{
+          background-color: $independence;
+          color: $white;
         }
+      }
     }
-    footer{
-        text-align: center;
-        background: $independence;
-        padding: 0.6em 0;
-        .contact {
-            color: $med_turqoise;
-        }
-        .copyright{
-            display: block;
-        }
+  }
+  footer{
+    text-align: center;
+    background: $independence;
+    padding: 0.6em 0;
+    .contact {
+      color: $med_turqoise;
     }
+    .copyright{
+      display: block;
+    }
+  }
 }
 // Page //
 #main #page, #main #home {
-    header {
-        padding-top: 2rem;
-        max-width: $content_width;
-        margin: 0 auto;
-        text-align: center;
-        border-bottom: 1px solid $less_white;
-        @media (max-width: $break_1) {
-            margin-top: 2rem;
-        }
-        h1{
-            margin-bottom: 0.5rem;
-        }
-        h2{
-            margin-top: 0;
-            font-weight: normal;
-            color: $less_white;
-        }
+  header {
+    padding-top: 2rem;
+    max-width: $content_width;
+    margin: 0 auto;
+    text-align: center;
+    border-bottom: 1px solid $less_white;
+    @media (max-width: $break_1) {
+      margin-top: 2rem;
     }
-    section {
-        max-width: $content_width;
-        margin: 0 auto;
-        h1, h2{
-            color: $less_white;
-            font-weight: 600;
-            text-decoration: underline;
-        }
+    h1{
+      margin-bottom: 0.5rem;
     }
+    h2{
+      margin-top: 0;
+      font-weight: normal;
+      color: $less_white;
+    }
+  }
+  section {
+    max-width: $content_width;
+    margin: 0 auto;
+    h1, h2{
+      color: $less_white;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+  }
 }
 // Gaming //
 #ts3-status{
-    table {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        h4 {
-            margin: 0;
-        }
-        tr {
-            border-collapse: collapse;
-            td {
-                border-top: 1px solid $less_white;
-                padding: 5px;
-            }
-            td:nth-child(2){
-                text-align: center;
-            }
-        }
+  table {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    h4 {
+      margin: 0;
     }
-    #status {
-        span {
-            padding: 3px;
-            border-radius: 3px;
-        }
-        .on {
-            color: $med_turqoise;
-            background: $blue_yonder;
-        }
-        .off {
-            color: $less_white;
-            background: $gunmetal;
-        }
+    tr {
+      border-collapse: collapse;
+      td {
+        border-top: 1px solid $less_white;
+        padding: 5px;
+      }
+      td:nth-child(2){
+        text-align: center;
+      }
     }
+  }
+  #status {
+    span {
+      padding: 3px;
+      border-radius: 3px;
+    }
+    .on {
+      color: $med_turqoise;
+      background: $blue_yonder;
+    }
+    .off {
+      color: $less_white;
+      background: $gunmetal;
+    }
+  }
 }
 // Pages //
 #main .page{
-    padding: 2rem;
-    .page-header{
-        @media (max-width: $break_1) {
-            margin-top: 2rem;
-        }
-        border-bottom: 1px solid $less_white;
-        text-align: center;
+  padding: 2rem;
+  .page-header{
+    @media (max-width: $break_1) {
+      margin-top: 2rem;
     }
+    border-bottom: 1px solid $less_white;
+    text-align: center;
+  }
 }
 // Post List //
 .post-list {
-    padding: 0 1em;
-    list-style-type: square;
-    li {
-        p {
-            margin-top: 0;
-        }
-        .meta {
-            float: right;
-            font-size: 0.8em;
-            color: $less_white;
-            text-transform: uppercase;
-
-        }
+  padding: 0 1em;
+  list-style-type: square;
+  li {
+    p {
+      margin-top: 0;
     }
+    .meta {
+      float: right;
+      font-size: 0.8em;
+      color: $less_white;
+      text-transform: uppercase;
+
+    }
+  }
 }
 // Posts //
 .post{
-    margin: 0 auto;
-    max-width: $content_width;
-    .post-header{
-        @media (max-width: $break_1) {
-            margin-top: 3rem;
-        }
+  margin: 0 auto;
+  max-width: $content_width;
+  .post-header{
+    @media (max-width: $break_1) {
+      margin-top: 3rem;
     }
-    .post-meta{
-            color: $less_white;
-            text-transform: uppercase;
-    }
+  }
+  .post-meta{
+    color: $less_white;
+    text-transform: uppercase;
+  }
 }

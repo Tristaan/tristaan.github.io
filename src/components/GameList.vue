@@ -81,7 +81,6 @@ export default {
           .catch(err => {
             console.error(err);
           });
-        this.sleep(2000);
     },
   },
   components: { GameTile }
