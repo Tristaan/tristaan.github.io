@@ -4,7 +4,7 @@
 # [Cenik]({{ site.baseurl }}{% link /files/cenik.pdf %}){: .pure-button .pure-button-primary}
 
 layout: vue
-title: Projects
+title: Completed Games
 subtitle: Pictures of stuff
 menus: navigation
 ---
