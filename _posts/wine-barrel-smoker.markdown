@@ -28,6 +28,6 @@ This takes some time, some of the other people said it takes from 1-2 hours, but
 ![Barrel hoops screwed]()
 
 ## The split
-After the screwing was done, I used my Bosch circular saw which has one of those hinge thingies included. I used this hinge to measure of about *15* centimeters from the top and then just cut straight around the barrel, after tightening the thingy to the saw. This was quite a straight forward task because of the proper tools available.
-![Bosch circular saw with hinge]()
+After the screwing was done, I used my Bosch circular saw which has a distancer included. I used it to measure of about *15* centimeters from the top and then just cut straight around the barrel. This was quite a straight forward task because of the tools available.
+![Bosch circular saw with distancer]()
 ![Barrel cut apart]()
