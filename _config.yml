@@ -51,6 +51,7 @@ show_excerpts: true
 # Build settings
 markdown: kramdown
 highlighter: rouge
+theme: null
 
 sass:
     sass_dir: _sass
