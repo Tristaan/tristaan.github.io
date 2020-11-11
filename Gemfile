@@ -8,8 +8,9 @@ source 'http://rubygems.org'
 #
 # This will help ensure the proper Jekyll version is running.
 # Happy Jekylling!
-# gem 'jekyll'
+gem 'jekyll'
 gem 'rouge'
+gem "sprockets", "~> 3.7"
 
 # If you want to use GitHub Pages, remove the "gem "jekyll"" above and
 # uncomment the line below. To upgrade, run `bundle update github-pages`.
@@ -17,12 +18,13 @@ gem 'rouge'
 
 # If you have any plugins, put them here!
 group :jekyll_plugins do
-  gem 'github-pages'
   gem 'jekyll-assets'
   gem 'jekyll-feed'
   gem 'jekyll-menus'
   gem 'jekyll-seo-tag'
 end
+
+gem 'kramdown-parser-gfm'
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
