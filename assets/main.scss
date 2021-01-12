@@ -314,4 +314,9 @@ body{
     color: $less_white;
     text-transform: uppercase;
   }
+  img{
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
 }
