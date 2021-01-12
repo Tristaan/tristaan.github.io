@@ -33,6 +33,17 @@ code{
   background: $more_white;
   border: 1px solid $less_white;
   padding: 5px;
+  pre.highlight {
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+  .rouge-gutter .lineno{
+    margin-right: 1em;
+    padding-right: 0.2em;
+    border-right: 1px solid $less_white;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
 }
 .far, .fas {
   margin-right: 5px;
