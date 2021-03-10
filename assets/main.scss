@@ -55,6 +55,14 @@ code.highlighter-rouge{
     border-right: 1px solid $less_white;
     margin-top: 0px;
     margin-bottom: 0px;
+    font-family: 'Cutive Mono';
+    font-size: 1.2em;
+  }
+  .rouge-code pre{
+    font-family: 'Cutive Mono';
+    font-size: 1.2em;
+    margin-top: 3px;
+    margin-bottom: 3px;
   }
 }
 .far, .fas {

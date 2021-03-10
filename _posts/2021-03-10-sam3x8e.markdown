@@ -1,0 +1,107 @@
+---
+layout: post
+title: Using the Atmel ATSAM3X8E on linux
+categories: [electronics]
+tags: [arduino, arm, atmel]
+---
+
+You might know the SAM3X8E from the Arduino Due, which can be quite easy to program using the arduino IDE. But how can you compile for and program the Atmel microcontroller directly using the native USB port? The information on this subject was scarce so I made a guide which may help you! This can work with all the devices that Microchip ASF supports.
+
+## Requirements
+So, to get up and running you need a couple of things:
+
+1. Arduino Due -> [arduino.cc](https://www.arduino.cc/en/pmwiki.php?n=Main/ArduinoBoardDue)
+2. ASF -> [microchip.com](https://www.microchip.com/en-us/development-tools-tools-and-software/libraries-code-examples-and-more/advanced-software-framework-for-sam-devices)
+3. OpenOCD -> [openocd.org](https://docs.platformio.org/en/latest/core/installation.html#installation-methods)
+  - If you have an OpenOCD JTAG debugger, which can be practical to debug your program
+4. arm-none-eabi-gcc [developer.arm.com](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
+  - Find this package using your distros package manager if available. You might also need the newlib package.
+5. BOSSA -> [shumatech.com](http://www.shumatech.com/web/products/bossa)
+
+We'll be using Arduino Due and it's **native USB** port. This can work with other ARM based microcontrollers from Atmel/Microchip that are supported by the ASF library, but this guide is AT91SAM3X8E specific.
+
+## BOSSA
+First we'll install the BOSSA toolset, which is needed to upload the compiled firmware onto the Atmel chip. In this guide we will install from source. First clone [this repo](https://github.com/shumatech/BOSSA) and run `make install` inside of it. Then copy the generated files inside `bin` dir into `/usr/local/bin`.
+
+```bash
+git clone https://github.com/shumatech/BOSSA
+cd BOSSA
+make install
+sudo cp bin/{bossa,bossac,bossash} /usr/local/bin
+```
+
+Now connect your board using the native USB port and test if BOSSA is working as expected: `bossac -i`. This should print out info about the board. If you have multiple serial devices connected to your PC, you might need to specify `-p <port>` to set the port used by the Arduino Due. If you connected it correctly and the board is still not displayed, try erasing and resetting the board using it's built-in buttons.
+
+## ASF and project initialization
+ASF is a big feature packed framework for working with SAM and other Atmel devices. It also includes code examples which we'll use to set up our custom project. Download ASF [here](https://www.microchip.com/en-us/development-tools-tools-and-software/libraries-code-examples-and-more/advanced-software-framework-for-sam-devices). Extract it and take a look around. It has many useful libraries.
+To set up our project we will create a directory which will serve as your project root. Copy xdk-asf-3.49.1 that you extracted into your project root. You can also rename it for easier configuration changes.
+
+```bash
+mkdir <project_root>
+unzip asf-standalone-archive-3.49.1.105.zip
+mv xdk-asf-3.49.1 <project_root>/asf
+cd <project_root>
+```
+
+If you checked there are a couple of applications inside the folders which include makefiles which we can use as a starting point.
+
+```bash
+mkdir include
+cp asf/sam/applications/getting-started/sam3x8e_arduino_due_x/gcc/* .
+cp asf/sam/utils/make/Makefile.sam.in Makefile
+mv asf.h include/.
+mkdir src
+cp asf/sam/applications/getting-started/main.c src/.
+cp asf/sam/applications/getting-started/sam3x8e_arduino_due_x/conf_* include/.
+```
+
+
+## Configuration
+The files are prepared and now we'll configure the `config.mk` file which holds the paths for sources and header files which must be compiled and included. As you might have noticed we added some custom directory structure to the project, which is good so it's tidied up. we must reflect these changes inside our config file.
+Open up **config.mk**. Set the `PRJ_PATH` to `asf` (the directory your ASF is located at). Next change the `TARGET_FLASH` and `TARGET_SRAM` to your project name for [better file names](https://library.stanford.edu/research/data-management-services/data-best-practices/best-practices-file-naming). The `CSRCS` directive contains all the .c files that are used in your project. Change the `getting-started/main.c` entry into `../src/main`. Notice that we added two dots in front of it, because of the **PRJ_PATH** being set to a directory inside your project. Next we'll edit the `INC_PATH`, remove the two `getting-started` entries and add `../include`. Note the trailing backslash it must be there so that makes the multiple lines as a single one. Feel free to edit the other options if needed, but mostly you'll just need **CSRCS** and **INC_PATH**. The defaults include a couple of services and drivers which you can use to create your program.
+
+## Building and uploading
+To upload you need to have the boards native USB port plugged in.
+
+```bash
+make
+bossac -e -w -v -b <TARGET_FLASH>.bin
+```
+
+Now reset the Arduino and check if the L LED is blinking. To reupload the program you must erase the flash & reset.
+Congratulations, you have successfully set up Arduino Due with ASF.
+
+## OpenOCD
+OpenOCD is a tool that creates a gdb server for the OpenOCD supporting JTAG adapter.
+OpenOCD is configured using the openocd.cfg file. We need to use the Olimex ARM-USB-OCD-H tool and specify the SAM3X8E board. Create openocd.cfg in your project root and fill it like so:
+```
+source [find interface/ftdi/olimex-arm-usb-ocd-h.cfg]
+source [find target/at91sam3ax_8x.cfg]
+```
+
+Also create a new folder called `gdb_scripts` and copy the `DEBUG_SCRIPT_FLASH` from **config.mk** into it. Edit it and modify the `target remote localhost:2331` to `target extended-remote localhost:3333` and some additional settings like depicted below. Modify the `DEBUG_SCRIPT_FLASH` in **config.mk** to point to `../gdb_scripts/arduino_due_x_flash.gdb`
+
+```conf
+define reset
+target extended-remote localhost:3333
+
+set remotetimeout 50
+set tcp connect-timeout 5
+set tcp auto-retry off
+set remote hardware-breakpoint-limit 6
+set remote hardware-watchpoint-limit 4
+set target-async on
+set mem inaccessible-by-default off
+set breakpoint pending off
+
+monitor reset init
+
+load
+
+info reg
+
+end
+
+```
+Then after building and uploading your program, run `openocd` which will create a gdb server which you can connect to using gdb! Use the command `make debug_flash` to connect to openocd.
+There is a handy guide on how to create breakpoints, read and write registers [here](https://www.tincantools.com/gdb-debugger-with-openocd/), check out no. 5. But watch out when you use continue when you delete all breakpoints, use `monitor resume` instead.
