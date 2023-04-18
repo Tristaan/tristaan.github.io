@@ -40,7 +40,12 @@ This is really useful and can even be made as a widget if there is a proper unde
 
 
 ## Current mouse status inside the kernel
-All the interfaces from the mouse are registered as hid-generic devices. So I tried to use a simple skeleton driver to bind to the third interface but it was not working because the hidcore takes precedence. I could use udev rules to block hidcore, but then again this adds unnecessary installation steps, which I want to avoid. So what we'll do is write a hid device driver on top of hidcore and not a bare USB driver, because this interface has a hid descriptor but it is vendor defined.
+All the interfaces from the mouse are registered as hid-generic devices. So I tried to use a simple skeleton driver to bind to the third interface but it was not working because the hidcore takes precedence. I could use udev rules to block hidcore, but then again this adds unnecessary installation steps, which I want to avoid. So what we'll assume is that the vendor defined HID descriptor is defective.
 
 
-So after reading countless source codes and a bit of kernel docs,
+So after reading countless kernel source codes and a bit of kernel docs, all the while trying out a custom driver I noticed that something may be wrong with the sent packet amount and the expected packet amount, so a custom HID descriptor won't do.
+The problem lies deeper, so a custom USB driver is necessary, but as time is a scarce resource a recommendation comes to mind; use the available hacked-together userspace driver mentioned above.
+
+
+## Custom USB Driver learnings
+So as interest was stronger than the lack of time I started hacking a mouse driver together from the steam-controller driver, the hid_ll_driver (usbhid) functions for request actually never get called. So here i am, stuck. Maybe some other time.
