@@ -22,6 +22,7 @@ group :jekyll_plugins do
   gem 'jekyll-feed'
   gem 'jekyll-menus'
   gem 'jekyll-seo-tag'
+  gem 'jekyll-pdf-embed'
 end
 
 gem 'kramdown-parser-gfm'
