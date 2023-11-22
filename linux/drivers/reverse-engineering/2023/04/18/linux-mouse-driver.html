@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en"><head><!-- Global Site Tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-125019416-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-125019416-2');
+</script>
+
+
+<meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:image" content="https://sneider.si/assets/logo_wide.png"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Linux mouse driver | sneider.si</title>
+<meta name="generator" content="Jekyll v3.9.3" />
+<meta property="og:title" content="Linux mouse driver" />
+<meta name="author" content="tristan" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This is a nearly 3-year-old project of mine. It started out as a libusb userspace driver just to make it work and keep it from crashing all the time. Now I’m revisiting this driver and rewriting it as a kernel module." />
+<meta property="og:description" content="This is a nearly 3-year-old project of mine. It started out as a libusb userspace driver just to make it work and keep it from crashing all the time. Now I’m revisiting this driver and rewriting it as a kernel module." />
+<link rel="canonical" href="https://sneider.si/linux/drivers/reverse-engineering/2023/04/18/linux-mouse-driver.html" />
+<meta property="og:url" content="https://sneider.si/linux/drivers/reverse-engineering/2023/04/18/linux-mouse-driver.html" />
+<meta property="og:site_name" content="sneider.si" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-04-18T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Linux mouse driver" />
+<meta name="twitter:site" content="@sneider_si" />
+<meta name="twitter:creator" content="@tristan" />
+<meta property="fb:admins" content="Tristan.sneider" />
+<meta property="article:publisher" content="Tristan.sneider" />
+<meta name="google-site-verification" content="8kBL7vAyL-pacXh9wYFQbA2HlYSs2WWmtA5UyRwK_s8" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"tristan"},"dateModified":"2023-04-18T00:00:00+00:00","datePublished":"2023-04-18T00:00:00+00:00","description":"This is a nearly 3-year-old project of mine. It started out as a libusb userspace driver just to make it work and keep it from crashing all the time. Now I’m revisiting this driver and rewriting it as a kernel module.","headline":"Linux mouse driver","mainEntityOfPage":{"@type":"WebPage","@id":"https://sneider.si/linux/drivers/reverse-engineering/2023/04/18/linux-mouse-driver.html"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://sneider.si/assets/logo_wide.png"},"name":"tristan"},"url":"https://sneider.si/linux/drivers/reverse-engineering/2023/04/18/linux-mouse-driver.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link href="https://fonts.googleapis.com/css?family=Zilla+Slab|Cutive+Mono|Kosugi+Maru|Montserrat:400,400i,700&amp;subset=cyrillic,latin-ext" rel="stylesheet">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/base-min.css">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/grids-responsive-min.css">
+  <script src="https://kit.fontawesome.com/cfc3b5fecb.js" crossorigin="anonymous"></script>
+<!-- Mathjax Support -->
+	<script type="text/javascript" async
+					src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+	</script>
+  <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://sneider.si/feed.xml" title="sneider.si" /></head>
+<body>
+        <main id="layout">
+            <a id="menuLink" class="menu-toggle" href="#menu">
+                <span></span>
+            </a>
+            <div id="menu"><nav class="pure-menu">
+    <a class="pure-menu-heading" rel="author" href="/">
+        sneider.si
+        <div>insmod, dmesg, rmmod</div>
+    </a>
+    <ul class="pure-menu-list">
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/about.html"
+                   title="Go to About">
+                    <i class="fas fa-caret-right"></i>
+                    About
+                </a>
+                
+            </li>
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/gaming.html"
+                   title="Go to Gaming">
+                    <i class="fas fa-caret-right"></i>
+                    Gaming
+                </a>
+                
+            </li>
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/"
+                   title="Go to Posts">
+                    <i class="fas fa-caret-right"></i>
+                    Posts
+                </a>
+                
+            </li>
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/projects.html"
+                   title="Go to Completed Games">
+                    <i class="fas fa-caret-right"></i>
+                    Completed Games
+                </a>
+                
+            </li>
+        
+    </ul>
+</nav>
+<footer class="">
+    <data class="" href="/"></data><a class="contact" href="mailto:tristan@sneider.si">Contact me!</a><span class="copyright">
+        <i class="far fa-copyright"></i>tristan</span>
+
+</footer></div>
+            <div id="main">
+                <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Linux mouse driver</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2023-04-18T00:00:00+00:00" itemprop="datePublished">18.04.2023, Tue
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This is a nearly 3-year-old project of mine. It started out as a <a href="https://github.com/tristaan/strix-claw">libusb userspace driver</a> just to make it work and keep it from crashing all the time. Now I’m revisiting this driver and rewriting it as a kernel module.</p>
+
+<h2 id="the-mouse">The mouse</h2>
+<p>The mouse is an <a href="https://www.asus.com/Keyboards-Mice/STRIX_CLAW/">ASUS Strix Claw</a> which has 3 special buttons for DPI settings.
+It is configurable through a windows program, but the goal is to get this functionality working on linux.</p>
+
+<h2 id="reverse-engineering-the-payload">Reverse engineering the payload</h2>
+<p>So to get the device working on linux we first need to gather information on what data is even sent to/from the device.
+I started monitoring the communication with <a href="https://www.wireshark.org/">Wireshark</a> on a windows machine and found out that this device has 3 interfaces:</p>
+<ol>
+  <li>Mouse &amp; Configuration</li>
+  <li>Keyboard Macros</li>
+  <li>DPI buttons</li>
+</ol>
+
+<h3 id="mouse--configuration">Mouse &amp; Configuration</h3>
+<p>On this interface (more precise endpoint1) the communication is like on any other mouse. The mouse sends movement &amp; button data to the pc and works normally without any problems. it sends 8 bytes every change.
+There is also a second endpoint0 which is used for configuration purposes and from what I read is default on most USB devices. The configuration program uses this endpoint to change the devices settings. It sends 8 bytes per transmission, which happens 14 times per configuration change.</p>
+
+<p>I described all the configuration bytes, which you can see this in this photo. Please note that I skipped keyboard macro configuration because the payloads were really huge + I don’t need keyboard macros on the mouse.
+IMG IMG</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="keyboard-macros">Keyboard Macros</h3>
+<p>Whenever a keyboard macro button is pressed the buttons presses come from interface1. It acts as a virtual keyboard and works perfectly fine as is.</p>
+
+<h3 id="dpi-buttons">DPI buttons</h3>
+<p>Now this is the problematic interface (endpoint3). Every time a button is pressed from this interface the mouse just locks up. Even the other eps stop working. I’m not 100% sure why this happens, but it should be because the interrupt for the payload is never triggered on the host, this causes then the device to lock up because of filled buffer. (??)</p>
+
+<p>The endpoint reports the current DPI level &amp; Sniper mode status on every press of these 3 buttons.
+This is really useful and can even be made as a widget if there is a proper underlying driver which reports this information to userspace. So this is what we will be working on.</p>
+
+<h2 id="current-mouse-status-inside-the-kernel">Current mouse status inside the kernel</h2>
+<p>All the interfaces from the mouse are registered as hid-generic devices. So I tried to use a simple skeleton driver to bind to the third interface but it was not working because the hidcore takes precedence. I could use udev rules to block hidcore, but then again this adds unnecessary installation steps, which I want to avoid. So what we’ll assume is that the vendor defined HID descriptor is defective.</p>
+
+<p>So after reading countless kernel source codes and a bit of kernel docs, all the while trying out a custom driver I noticed that something may be wrong with the sent packet amount and the expected packet amount, so a custom HID descriptor won’t do.
+The problem lies deeper, so a custom USB driver is necessary, but as time is a scarce resource a recommendation comes to mind; use the available hacked-together userspace driver mentioned above.</p>
+
+<h2 id="custom-usb-driver-learnings">Custom USB Driver learnings</h2>
+<p>So as interest was stronger than the lack of time I started hacking a mouse driver together from the steam-controller driver, the hid_ll_driver (usbhid) functions for request actually never get called. So here i am, stuck. Maybe some other time.</p>
+
+  </div><a class="u-url" href="/linux/drivers/reverse-engineering/2023/04/18/linux-mouse-driver.html" hidden></a>
+</article>
+
+            </div>
+        </main>
+				<style>
+    #cookie-notice {padding: 0.5rem 1rem; display: none; text-align: center; position: fixed; bottom: 0; width: calc(100% - 2rem); background: #222; color: rgba(255,255,255,0.8);}
+    #cookie-notice a {display: inline-block; cursor: pointer; margin-left: 0.5rem;}
+    @media (max-width: 767px) {
+        #cookie-notice span {display: block; padding-top: 3px; margin-bottom: 1rem;}
+        #cookie-notice a {position: relative; bottom: 4px;}
+    }
+</style>
+<div id="cookie-notice"><span>We would like to use third party cookies and scripts to improve the functionality of this website.</span><a id="cookie-notice-accept" class="btn btn-primary btn-sm">Approve</a><a href="/privacy" class="btn btn-primary btn-sm">More info</a></div>
+<script>
+    function createCookie(name,value,days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + expires + "; path=/";
+    }
+    function readCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0;i < ca.length;i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
+    }
+    function eraseCookie(name) {
+        createCookie(name,"",-1);
+    }
+
+    if(readCookie('cookie-notice-dismissed')=='true') {
+			// Enter Includes here
+    } else {
+        document.getElementById('cookie-notice').style.display = 'block';
+    }
+    document.getElementById('cookie-notice-accept').addEventListener("click",function() {
+        createCookie('cookie-notice-dismissed','true',31);
+        document.getElementById('cookie-notice').style.display = 'none';
+        location.reload();
+    });
+
+</script>
+
+        <script>
+menuLink.onclick=function(a){a.preventDefault();var e="active";layout.className=layout.className==e?"":e};
+donateButton.onclick=function(a){a.preventDefault();var e="active";donate.className=donate.className==e?"":e};
+        </script>
+    </body>
+</html>

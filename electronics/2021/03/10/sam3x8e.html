@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en"><head><!-- Global Site Tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-125019416-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-125019416-2');
+</script>
+
+
+<meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:image" content="https://sneider.si/assets/logo_wide.png"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Using the Atmel ATSAM3X8E on linux | sneider.si</title>
+<meta name="generator" content="Jekyll v3.9.3" />
+<meta property="og:title" content="Using the Atmel ATSAM3X8E on linux" />
+<meta name="author" content="tristan" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="You might know the SAM3X8E from the Arduino Due, which can be quite easy to program using the arduino IDE. But how can you compile for and program the Atmel microcontroller directly using the native USB port? The information on this subject was scarce so I made a guide which may help you! This can work with all the devices that Microchip ASF supports." />
+<meta property="og:description" content="You might know the SAM3X8E from the Arduino Due, which can be quite easy to program using the arduino IDE. But how can you compile for and program the Atmel microcontroller directly using the native USB port? The information on this subject was scarce so I made a guide which may help you! This can work with all the devices that Microchip ASF supports." />
+<link rel="canonical" href="https://sneider.si/electronics/2021/03/10/sam3x8e.html" />
+<meta property="og:url" content="https://sneider.si/electronics/2021/03/10/sam3x8e.html" />
+<meta property="og:site_name" content="sneider.si" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-03-10T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Using the Atmel ATSAM3X8E on linux" />
+<meta name="twitter:site" content="@sneider_si" />
+<meta name="twitter:creator" content="@tristan" />
+<meta property="fb:admins" content="Tristan.sneider" />
+<meta property="article:publisher" content="Tristan.sneider" />
+<meta name="google-site-verification" content="8kBL7vAyL-pacXh9wYFQbA2HlYSs2WWmtA5UyRwK_s8" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"tristan"},"dateModified":"2021-03-10T00:00:00+00:00","datePublished":"2021-03-10T00:00:00+00:00","description":"You might know the SAM3X8E from the Arduino Due, which can be quite easy to program using the arduino IDE. But how can you compile for and program the Atmel microcontroller directly using the native USB port? The information on this subject was scarce so I made a guide which may help you! This can work with all the devices that Microchip ASF supports.","headline":"Using the Atmel ATSAM3X8E on linux","mainEntityOfPage":{"@type":"WebPage","@id":"https://sneider.si/electronics/2021/03/10/sam3x8e.html"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://sneider.si/assets/logo_wide.png"},"name":"tristan"},"url":"https://sneider.si/electronics/2021/03/10/sam3x8e.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link href="https://fonts.googleapis.com/css?family=Zilla+Slab|Cutive+Mono|Kosugi+Maru|Montserrat:400,400i,700&amp;subset=cyrillic,latin-ext" rel="stylesheet">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/base-min.css">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/grids-responsive-min.css">
+  <script src="https://kit.fontawesome.com/cfc3b5fecb.js" crossorigin="anonymous"></script>
+<!-- Mathjax Support -->
+	<script type="text/javascript" async
+					src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+	</script>
+  <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://sneider.si/feed.xml" title="sneider.si" /></head>
+<body>
+        <main id="layout">
+            <a id="menuLink" class="menu-toggle" href="#menu">
+                <span></span>
+            </a>
+            <div id="menu"><nav class="pure-menu">
+    <a class="pure-menu-heading" rel="author" href="/">
+        sneider.si
+        <div>insmod, dmesg, rmmod</div>
+    </a>
+    <ul class="pure-menu-list">
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/about.html"
+                   title="Go to About">
+                    <i class="fas fa-caret-right"></i>
+                    About
+                </a>
+                
+            </li>
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/gaming.html"
+                   title="Go to Gaming">
+                    <i class="fas fa-caret-right"></i>
+                    Gaming
+                </a>
+                
+            </li>
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/"
+                   title="Go to Posts">
+                    <i class="fas fa-caret-right"></i>
+                    Posts
+                </a>
+                
+            </li>
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/projects.html"
+                   title="Go to Completed Games">
+                    <i class="fas fa-caret-right"></i>
+                    Completed Games
+                </a>
+                
+            </li>
+        
+    </ul>
+</nav>
+<footer class="">
+    <data class="" href="/"></data><a class="contact" href="mailto:tristan@sneider.si">Contact me!</a><span class="copyright">
+        <i class="far fa-copyright"></i>tristan</span>
+
+</footer></div>
+            <div id="main">
+                <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Using the Atmel ATSAM3X8E on linux</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2021-03-10T00:00:00+00:00" itemprop="datePublished">10.03.2021, Wed
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>You might know the SAM3X8E from the Arduino Due, which can be quite easy to program using the arduino IDE. But how can you compile for and program the Atmel microcontroller directly using the native USB port? The information on this subject was scarce so I made a guide which may help you! This can work with all the devices that Microchip ASF supports.</p>
+
+<h2 id="requirements">Requirements</h2>
+<p>So, to get up and running you need a couple of things:</p>
+
+<ol>
+  <li>Arduino Due -&gt; <a href="https://www.arduino.cc/en/pmwiki.php?n=Main/ArduinoBoardDue">arduino.cc</a></li>
+  <li>ASF -&gt; <a href="https://www.microchip.com/en-us/development-tools-tools-and-software/libraries-code-examples-and-more/advanced-software-framework-for-sam-devices">microchip.com</a></li>
+  <li>OpenOCD -&gt; <a href="https://docs.platformio.org/en/latest/core/installation.html#installation-methods">openocd.org</a>
+    <ul>
+      <li>If you have an OpenOCD JTAG debugger, which can be practical to debug your program</li>
+    </ul>
+  </li>
+  <li>arm-none-eabi-gcc <a href="https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads">developer.arm.com</a>
+    <ul>
+      <li>Find this package using your distros package manager if available. You might also need the newlib package.</li>
+    </ul>
+  </li>
+  <li>BOSSA -&gt; <a href="http://www.shumatech.com/web/products/bossa">shumatech.com</a></li>
+</ol>
+
+<p>We’ll be using Arduino Due and it’s <strong>native USB</strong> port. This can work with other ARM based microcontrollers from Atmel/Microchip that are supported by the ASF library, but this guide is AT91SAM3X8E specific.</p>
+
+<h2 id="bossa">BOSSA</h2>
+<p>First we’ll install the BOSSA toolset, which is needed to upload the compiled firmware onto the Atmel chip. In this guide we will install from source. First clone <a href="https://github.com/shumatech/BOSSA">this repo</a> and run <code class="language-plaintext highlighter-rouge">make install</code> inside of it. Then copy the generated files inside <code class="language-plaintext highlighter-rouge">bin</code> dir into <code class="language-plaintext highlighter-rouge">/usr/local/bin</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>git clone https://github.com/shumatech/BOSSA
+<span class="nb">cd </span>BOSSA
+make <span class="nb">install
+sudo cp </span>bin/<span class="o">{</span>bossa,bossac,bossash<span class="o">}</span> /usr/local/bin
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Now connect your board using the native USB port and test if BOSSA is working as expected: <code class="language-plaintext highlighter-rouge">bossac -i</code>. This should print out info about the board. If you have multiple serial devices connected to your PC, you might need to specify <code class="language-plaintext highlighter-rouge">-p &lt;port&gt;</code> to set the port used by the Arduino Due. If you connected it correctly and the board is still not displayed, try erasing and resetting the board using it’s built-in buttons.</p>
+
+<h2 id="asf-and-project-initialization">ASF and project initialization</h2>
+<p>ASF is a big feature packed framework for working with SAM and other Atmel devices. It also includes code examples which we’ll use to set up our custom project. Download ASF <a href="https://www.microchip.com/en-us/development-tools-tools-and-software/libraries-code-examples-and-more/advanced-software-framework-for-sam-devices">here</a>. Extract it and take a look around. It has many useful libraries.
+To set up our project we will create a directory which will serve as your project root. Copy xdk-asf-3.49.1 that you extracted into your project root. You can also rename it for easier configuration changes.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="nb">mkdir</span> &lt;project_root&gt;
+unzip asf-standalone-archive-3.49.1.105.zip
+<span class="nb">mv </span>xdk-asf-3.49.1 &lt;project_root&gt;/asf
+<span class="nb">cd</span> &lt;project_root&gt;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>If you checked there are a couple of applications inside the folders which include makefiles which we can use as a starting point.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre><span class="nb">mkdir </span>include
+<span class="nb">cp </span>asf/sam/applications/getting-started/sam3x8e_arduino_due_x/gcc/<span class="k">*</span> <span class="nb">.</span>
+<span class="nb">cp </span>asf/sam/utils/make/Makefile.sam.in Makefile
+<span class="nb">mv </span>asf.h include/.
+<span class="nb">mkdir </span>src
+<span class="nb">cp </span>asf/sam/applications/getting-started/main.c src/.
+<span class="nb">cp </span>asf/sam/applications/getting-started/sam3x8e_arduino_due_x/conf_<span class="k">*</span> include/.
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="configuration">Configuration</h2>
+<p>The files are prepared and now we’ll configure the <code class="language-plaintext highlighter-rouge">config.mk</code> file which holds the paths for sources and header files which must be compiled and included. As you might have noticed we added some custom directory structure to the project, which is good so it’s tidied up. we must reflect these changes inside our config file.
+Open up <strong>config.mk</strong>. Set the <code class="language-plaintext highlighter-rouge">PRJ_PATH</code> to <code class="language-plaintext highlighter-rouge">asf</code> (the directory your ASF is located at). Next change the <code class="language-plaintext highlighter-rouge">TARGET_FLASH</code> and <code class="language-plaintext highlighter-rouge">TARGET_SRAM</code> to your project name for <a href="https://library.stanford.edu/research/data-management-services/data-best-practices/best-practices-file-naming">better file names</a>. The <code class="language-plaintext highlighter-rouge">CSRCS</code> directive contains all the .c files that are used in your project. Change the <code class="language-plaintext highlighter-rouge">getting-started/main.c</code> entry into <code class="language-plaintext highlighter-rouge">../src/main</code>. Notice that we added two dots in front of it, because of the <strong>PRJ_PATH</strong> being set to a directory inside your project. Next we’ll edit the <code class="language-plaintext highlighter-rouge">INC_PATH</code>, remove the two <code class="language-plaintext highlighter-rouge">getting-started</code> entries and add <code class="language-plaintext highlighter-rouge">../include</code>. Note the trailing backslash it must be there so that makes the multiple lines as a single one. Feel free to edit the other options if needed, but mostly you’ll just need <strong>CSRCS</strong> and <strong>INC_PATH</strong>. The defaults include a couple of services and drivers which you can use to create your program.</p>
+
+<h2 id="building-and-uploading">Building and uploading</h2>
+<p>To upload you need to have the boards native USB port plugged in.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>make
+bossac <span class="nt">-e</span> <span class="nt">-w</span> <span class="nt">-v</span> <span class="nt">-b</span> &lt;TARGET_FLASH&gt;.bin
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Now reset the Arduino and check if the L LED is blinking. To reupload the program you must erase the flash &amp; reset.
+Congratulations, you have successfully set up Arduino Due with ASF.</p>
+
+<h2 id="openocd">OpenOCD</h2>
+<p>OpenOCD is a tool that creates a gdb server for the OpenOCD supporting JTAG adapter.
+OpenOCD is configured using the openocd.cfg file. We need to use the Olimex ARM-USB-OCD-H tool and specify the SAM3X8E board. Create openocd.cfg in your project root and fill it like so:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>source [find interface/ftdi/olimex-arm-usb-ocd-h.cfg]
+source [find target/at91sam3ax_8x.cfg]
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Also create a new folder called <code class="language-plaintext highlighter-rouge">gdb_scripts</code> and copy the <code class="language-plaintext highlighter-rouge">DEBUG_SCRIPT_FLASH</code> from <strong>config.mk</strong> into it. Edit it and modify the <code class="language-plaintext highlighter-rouge">target remote localhost:2331</code> to <code class="language-plaintext highlighter-rouge">target extended-remote localhost:3333</code> and some additional settings like depicted below. Modify the <code class="language-plaintext highlighter-rouge">DEBUG_SCRIPT_FLASH</code> in <strong>config.mk</strong> to point to <code class="language-plaintext highlighter-rouge">../gdb_scripts/arduino_due_x_flash.gdb</code></p>
+
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre></td><td class="rouge-code"><pre><span class="n">define</span> <span class="n">reset</span>
+<span class="n">target</span> <span class="n">extended</span>-<span class="n">remote</span> <span class="n">localhost</span>:<span class="m">3333</span>
+
+<span class="n">set</span> <span class="n">remotetimeout</span> <span class="m">50</span>
+<span class="n">set</span> <span class="n">tcp</span> <span class="n">connect</span>-<span class="n">timeout</span> <span class="m">5</span>
+<span class="n">set</span> <span class="n">tcp</span> <span class="n">auto</span>-<span class="n">retry</span> <span class="n">off</span>
+<span class="n">set</span> <span class="n">remote</span> <span class="n">hardware</span>-<span class="n">breakpoint</span>-<span class="n">limit</span> <span class="m">6</span>
+<span class="n">set</span> <span class="n">remote</span> <span class="n">hardware</span>-<span class="n">watchpoint</span>-<span class="n">limit</span> <span class="m">4</span>
+<span class="n">set</span> <span class="n">target</span>-<span class="n">async</span> <span class="n">on</span>
+<span class="n">set</span> <span class="n">mem</span> <span class="n">inaccessible</span>-<span class="n">by</span>-<span class="n">default</span> <span class="n">off</span>
+<span class="n">set</span> <span class="n">breakpoint</span> <span class="n">pending</span> <span class="n">off</span>
+
+<span class="n">monitor</span> <span class="n">reset</span> <span class="n">init</span>
+
+<span class="n">load</span>
+
+<span class="n">info</span> <span class="n">reg</span>
+
+<span class="n">end</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>Then after building and uploading your program, run <code class="language-plaintext highlighter-rouge">openocd</code> which will create a gdb server which you can connect to using gdb! Use the command <code class="language-plaintext highlighter-rouge">make debug_flash</code> to connect to openocd.
+There is a handy guide on how to create breakpoints, read and write registers <a href="https://www.tincantools.com/gdb-debugger-with-openocd/">here</a>, check out no. 5. But watch out when you use continue when you delete all breakpoints, use <code class="language-plaintext highlighter-rouge">monitor resume</code> instead.</p>
+
+  </div><a class="u-url" href="/electronics/2021/03/10/sam3x8e.html" hidden></a>
+</article>
+
+            </div>
+        </main>
+				<style>
+    #cookie-notice {padding: 0.5rem 1rem; display: none; text-align: center; position: fixed; bottom: 0; width: calc(100% - 2rem); background: #222; color: rgba(255,255,255,0.8);}
+    #cookie-notice a {display: inline-block; cursor: pointer; margin-left: 0.5rem;}
+    @media (max-width: 767px) {
+        #cookie-notice span {display: block; padding-top: 3px; margin-bottom: 1rem;}
+        #cookie-notice a {position: relative; bottom: 4px;}
+    }
+</style>
+<div id="cookie-notice"><span>We would like to use third party cookies and scripts to improve the functionality of this website.</span><a id="cookie-notice-accept" class="btn btn-primary btn-sm">Approve</a><a href="/privacy" class="btn btn-primary btn-sm">More info</a></div>
+<script>
+    function createCookie(name,value,days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + expires + "; path=/";
+    }
+    function readCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0;i < ca.length;i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
+    }
+    function eraseCookie(name) {
+        createCookie(name,"",-1);
+    }
+
+    if(readCookie('cookie-notice-dismissed')=='true') {
+			// Enter Includes here
+    } else {
+        document.getElementById('cookie-notice').style.display = 'block';
+    }
+    document.getElementById('cookie-notice-accept').addEventListener("click",function() {
+        createCookie('cookie-notice-dismissed','true',31);
+        document.getElementById('cookie-notice').style.display = 'none';
+        location.reload();
+    });
+
+</script>
+
+        <script>
+menuLink.onclick=function(a){a.preventDefault();var e="active";layout.className=layout.className==e?"":e};
+donateButton.onclick=function(a){a.preventDefault();var e="active";donate.className=donate.className==e?"":e};
+        </script>
+    </body>
+</html>

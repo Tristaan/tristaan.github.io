@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en"><head><!-- Global Site Tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-125019416-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-125019416-2');
+</script>
+
+
+<meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:image" content="https://sneider.si/assets/logo_wide.png"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Arduino load cell | sneider.si</title>
+<meta name="generator" content="Jekyll v3.9.3" />
+<meta property="og:title" content="Arduino load cell" />
+<meta name="author" content="tristan" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This project started out as an assignment for school, where we had to create a measurement system from selected sensors, to measure volume. I chose a load cell for getting the mass and a thermistor to get the temperature for temp variable density." />
+<meta property="og:description" content="This project started out as an assignment for school, where we had to create a measurement system from selected sensors, to measure volume. I chose a load cell for getting the mass and a thermistor to get the temperature for temp variable density." />
+<link rel="canonical" href="https://sneider.si/electronics/2021/01/12/load-cell.html" />
+<meta property="og:url" content="https://sneider.si/electronics/2021/01/12/load-cell.html" />
+<meta property="og:site_name" content="sneider.si" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-12T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Arduino load cell" />
+<meta name="twitter:site" content="@sneider_si" />
+<meta name="twitter:creator" content="@tristan" />
+<meta property="fb:admins" content="Tristan.sneider" />
+<meta property="article:publisher" content="Tristan.sneider" />
+<meta name="google-site-verification" content="8kBL7vAyL-pacXh9wYFQbA2HlYSs2WWmtA5UyRwK_s8" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"tristan"},"dateModified":"2021-01-12T00:00:00+00:00","datePublished":"2021-01-12T00:00:00+00:00","description":"This project started out as an assignment for school, where we had to create a measurement system from selected sensors, to measure volume. I chose a load cell for getting the mass and a thermistor to get the temperature for temp variable density.","headline":"Arduino load cell","mainEntityOfPage":{"@type":"WebPage","@id":"https://sneider.si/electronics/2021/01/12/load-cell.html"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://sneider.si/assets/logo_wide.png"},"name":"tristan"},"url":"https://sneider.si/electronics/2021/01/12/load-cell.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link href="https://fonts.googleapis.com/css?family=Zilla+Slab|Cutive+Mono|Kosugi+Maru|Montserrat:400,400i,700&amp;subset=cyrillic,latin-ext" rel="stylesheet">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/base-min.css">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/grids-responsive-min.css">
+  <script src="https://kit.fontawesome.com/cfc3b5fecb.js" crossorigin="anonymous"></script>
+<!-- Mathjax Support -->
+	<script type="text/javascript" async
+					src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+	</script>
+  <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://sneider.si/feed.xml" title="sneider.si" /></head>
+<body>
+        <main id="layout">
+            <a id="menuLink" class="menu-toggle" href="#menu">
+                <span></span>
+            </a>
+            <div id="menu"><nav class="pure-menu">
+    <a class="pure-menu-heading" rel="author" href="/">
+        sneider.si
+        <div>insmod, dmesg, rmmod</div>
+    </a>
+    <ul class="pure-menu-list">
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/about.html"
+                   title="Go to About">
+                    <i class="fas fa-caret-right"></i>
+                    About
+                </a>
+                
+            </li>
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/gaming.html"
+                   title="Go to Gaming">
+                    <i class="fas fa-caret-right"></i>
+                    Gaming
+                </a>
+                
+            </li>
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/"
+                   title="Go to Posts">
+                    <i class="fas fa-caret-right"></i>
+                    Posts
+                </a>
+                
+            </li>
+        
+            <li class="pure-menu-item item-">
+                <a class="pure-menu-link"
+                   href="/projects.html"
+                   title="Go to Completed Games">
+                    <i class="fas fa-caret-right"></i>
+                    Completed Games
+                </a>
+                
+            </li>
+        
+    </ul>
+</nav>
+<footer class="">
+    <data class="" href="/"></data><a class="contact" href="mailto:tristan@sneider.si">Contact me!</a><span class="copyright">
+        <i class="far fa-copyright"></i>tristan</span>
+
+</footer></div>
+            <div id="main">
+                <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Arduino load cell</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2021-01-12T00:00:00+00:00" itemprop="datePublished">12.01.2021, Tue
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This project started out as an assignment for school, where we had to create a measurement system from selected sensors, to measure volume. I chose a load cell for getting the mass and a thermistor to get the temperature for temp variable density.</p>
+
+<h2 id="requirements">Requirements</h2>
+<p>To successfully create this measurement system we require couple of components for which I’ll include links.</p>
+
+<ol>
+  <li>Arduino Uno -&gt;<a href="https://store.arduino.cc/arduino-uno-rev3-smd">Official store</a></li>
+  <li>HX711 &amp; Load cell -&gt;<a href="https://www.amazon.de/gp/product/B07MY35F92">Amazon</a></li>
+  <li>Thermistor -&gt; <a href="https://www.adafruit.com/product/372">Adafruit</a></li>
+  <li>10k Resistor -&gt; <a href="https://www.adafruit.com/product/2784">Adafruit</a></li>
+  <li>Wires -&gt; <a href="https://www.adafruit.com/product/153">Adafruit</a></li>
+  <li>Breadboard -&gt; <a href="https://www.adafruit.com/product/64">Adafruit</a></li>
+  <li>3D printed parts -&gt; <a href="https://www.thingiverse.com/thing:3129439">Thingiverse</a> (I recommend using the bigger bottom part)
+OR you can create your own testbed from wood if you have the woodworking skills.</li>
+  <li>Arduino IDE with HX711 library -&gt; <a href="https://www.arduino.cc/en/software">IDE</a></li>
+  <li>Reference weight</li>
+</ol>
+
+<p>The HX711 &amp; Load cell come unsoldered, so you also must <a href="https://content.instructables.com/ORIG/FH7/R58E/J7UR7KPT/FH7R58EJ7UR7KPT.jpg?auto=webp&amp;frame=1&amp;width=1024&amp;fit=bounds&amp;md=a578cb5e055ee72a8411256e2287530d">solder</a> them together or find an already soldered pair. You can also use your own custom parts, but keep in mind that you’ll have a different lookup table for the thermistor. The load cells parameters will also be different, but they are different from cell to cell.
+Arduino IDE comes with a library manager built-in so you need to install the HX711 library. I won’t cover how to do this in this guide because it’s just a google away.</p>
+
+<h2 id="load-cell-testbed">Load cell testbed</h2>
+<p><img src="/files/bremenska_celica.jpg" alt="Load cell test bed" /></p>
+
+<h2 id="wiring">Wiring</h2>
+<p><img src="/files/arduino_povezave.png" alt="Wiring diagram" /></p>
+
+<p>The HX711 breakout board in the diagram is different from the HX711 used, but the pinouts are the same.
+The DATA and SCK pins from HX711 got to 8 and 9 respectively. The GND and VCC pins connect to GND and 5V. Following the wiring of the HX711 breakout board, the thermistor wiring is a tad bit more complicated, because it uses a pullup resistor. We use the pullup resistor because we don’t want the analog input pin A0 to float. We also use a trick where we don’t connect the pullup resistor to 5V, instead we connect it to a digital I/O pin which we will set <strong>HIGH</strong> (5V) only when measuring. This helps to prevent the current from flowing through the thermistor when not used and keeps the power dissipation lowest. So connect one end of the resistor to I/O pin number 2, the other end to one of the thermistor pins, the other end of the thermistor to GND and connect the analog pin A0 to the junction of the thermistor and resistor.</p>
+
+<p>So now we have our wiring completed. Feel free to use different pins for connection but also change the pins in the configuration.</p>
+
+<h2 id="basic-program">Basic program</h2>
+<p>Start Arduino IDE and create a new project.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+</pre></td><td class="rouge-code"><pre><span class="cp">#include</span> <span class="cpf">"HX711.h"</span><span class="cp">
+</span>
+<span class="c1">// Constants</span>
+<span class="c1">// pull up resistor resistance</span>
+<span class="cp">#define TEMPRESISTOR 10000
+</span>
+<span class="c1">// Wiring</span>
+<span class="cp">#define THERMISTOR_PIN A0
+#define THERMISTOR_PULL_UP_PIN 2
+#define LOADCELL_DOUT_PIN 8
+#define LOADCELL_SCK_PIN 9
+</span><span class="n">HX711</span> <span class="n">scale</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">pinMode</span><span class="p">(</span><span class="n">THERMISTOR_PULL_UP_PIN</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+  <span class="c1">// Start scale</span>
+  <span class="n">scale</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">LOADCELL_DOUT_PIN</span><span class="p">,</span> <span class="n">LOADCELL_SCK_PIN</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">scale</span><span class="p">.</span><span class="n">is_ready</span><span class="p">())</span> <span class="p">{</span>
+    <span class="kt">float</span> <span class="n">load_cell</span> <span class="o">=</span> <span class="n">scale</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+    <span class="kt">float</span> <span class="n">thermistor</span> <span class="o">=</span> <span class="n">analogRead</span><span class="p">(</span><span class="n">THERMISTOR_PIN</span><span class="p">);</span>
+
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"load_cell: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">load_cell</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">", thermistor: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">thermistor</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"HX711 not found"</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">delay</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>As you can see in the defines if you have different connections change the pin constants accordingly.
+We have our basic program that prints the received readings to the serial interface of Arduino IDE. As you might suspect this program returns raw values, but we want them to be in <strong>°C</strong> and <strong>ml</strong>. First we need to get the calibration factor for the HX711 library. Everything the library does with the factor is divide the reading with the calibration factor. To get this factor we first add <code class="highlight language-c" data-lang="c"><span class="kt">float</span> <span class="n">calibration_factor</span> <span class="o">=</span> <span class="mi">736</span><span class="p">.</span><span class="mi">175</span><span class="p">;</span></code> above the setup function. Then we add two lines into the setup function.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="n">scale</span><span class="p">.</span><span class="n">set_scale</span><span class="p">(</span><span class="n">calibration_factor</span><span class="p">);</span>
+<span class="n">scale</span><span class="p">.</span><span class="n">tare</span><span class="p">();</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>And change the <code class="language-plaintext highlighter-rouge">scale.read()</code> to <code class="language-plaintext highlighter-rouge">scale.get_units()</code>.</p>
+
+<p>Now you have everything prepared to set your calibration factor.</p>
+
+<ol>
+  <li>Run the program without any weight</li>
+  <li>Place the reference weight on the load cell</li>
+  <li>Increase the factor if read value is too high or decrease if the value is too low</li>
+  <li>Repeat the process until the weight read and actual reference weight match</li>
+</ol>
+
+<p>You could also write a simple addition to the program which adds/subtracts based on user input through serial. Like so:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre><span class="k">if</span><span class="p">(</span><span class="n">Serial</span><span class="p">.</span><span class="n">available</span><span class="p">()</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">char</span> <span class="n">command</span> <span class="o">=</span> <span class="n">Serial</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+  <span class="k">switch</span><span class="p">(</span><span class="n">command</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="sc">'+'</span><span class="p">:</span>
+      <span class="n">calibration_factor</span><span class="o">+=</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">;</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="k">case</span> <span class="sc">'-'</span><span class="p">:</span>
+      <span class="n">calibration_factor</span><span class="o">-=</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">;</span>
+      <span class="k">break</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">scale</span><span class="p">.</span><span class="n">set_scale</span><span class="p">(</span><span class="n">calibration_factor</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>Place it just above the <code class="language-plaintext highlighter-rouge">delay(200)</code> line. This is practical for finetuning, but when starting off it’s easier to change the value in bigger amounts and recompiling.</p>
+
+<h2 id="getting-the-volume">Getting the volume</h2>
+<p>Volume is calculated like so: \(V = \frac{m}{\rho(T)}\). Where m is <strong>mass</strong> (which we have) and \(\rho(T)\) is <strong>density</strong>. Now we want to convert the thermistor resistance to temperature to density. This can be accomplished with so called lookup tables, because the temperature in relation to resistance doesn’t follow a known curve (approximations exist, but we will not use them here).</p>
+
+<p>A lookup table is a simple table with value A in one column and value B in the second. We can’t create a lookup table for all possible values so we <a href="https://en.wikipedia.org/wiki/InterpolationjG">Interpolate</a> if we receive a reading that is <strong>between</strong> values from the lookup table. We do the same to get the density from temperature. In total we will have two lookup tables. One for the <strong>thermistor resistance temperature</strong> relationship and one for the <strong>density temperature</strong> relationship which are located <a href="https://github.com/Tristaan/arduino-load-cell/blob/master/lookup_tables.h">here</a>.</p>
+
+\[y=y_0+(y_1 - y_0)\frac{x - x_0}{x_1 - x_0}\]
+
+<p>Place the header file into your project directory and include it in the main .ino file: <code class="highlight language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">"lookup_tables.h"</span></code></p>
+
+<h2 id="getting-the-density">Getting the density</h2>
+<p>We create a function that uses the thermistor lookup table and turns the resistance into temperature.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre></td><td class="rouge-code"><pre><span class="c1">// Function to get temperature from thermistor</span>
+<span class="kt">float</span> <span class="nf">get_temp</span><span class="p">(</span><span class="kt">float</span> <span class="n">data</span><span class="p">[</span><span class="mi">101</span><span class="p">][</span><span class="mi">2</span><span class="p">]){</span>
+  <span class="kt">float</span> <span class="n">reading</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="c1">// Only 5V when reading from thermistor, prevent heating</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">THERMISTOR_PULL_UP_PIN</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+  <span class="c1">// Read 10 values and calculate average</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+    <span class="n">reading</span> <span class="o">+=</span> <span class="n">analogRead</span><span class="p">(</span><span class="n">THERMISTOR_PIN</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">THERMISTOR_PULL_UP_PIN</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+  <span class="n">reading</span> <span class="o">=</span> <span class="n">reading</span><span class="o">/</span><span class="mi">10</span><span class="p">;</span>
+  <span class="c1">// Get resistance of thermistor from reading</span>
+  <span class="n">reading</span> <span class="o">=</span> <span class="n">TEMPRESISTOR</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1023</span><span class="o">/</span><span class="n">reading</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="c1">// Get temperature from lookup table (linear interpolation)</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">101</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">reading</span> <span class="o">&lt;=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">reading</span> <span class="o">&gt;</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="p">((</span><span class="n">reading</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]))));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>Place it at the bottom of the .ino file. Now what this function does is turns the I/O pin where the resistor is connected <strong>HIGH</strong> (to 5V), reads 10 values from the thermistor, divides by 10 so we get the average and turns the A/D value into resistance. Then it finds the range between which the reading is and interpolates to get the approximated value. We could have also used polynomial interpolation, but for the sake of simplicity we didn’t. we return a -1 if the reading is out of bounds of the lookup table.
+We also do the same for density, where the variable is temperature instead of resistance.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre><span class="c1">// Function to get density from temperature</span>
+<span class="kt">float</span> <span class="nf">get_density</span><span class="p">(</span><span class="kt">float</span> <span class="n">temperature</span><span class="p">,</span> <span class="kt">float</span> <span class="n">data</span><span class="p">[</span><span class="mi">34</span><span class="p">][</span><span class="mi">2</span><span class="p">]){</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">34</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">temperature</span> <span class="o">&gt;=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">temperature</span> <span class="o">&lt;</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="p">((</span><span class="n">temperature</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]))));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>Place it above or below the <code class="language-plaintext highlighter-rouge">get_temp()</code> function.</p>
+
+<p>Now we want to use those functions in the main loop. This is quite easy, we just need to replace a couple of lines.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+</pre></td><td class="rouge-code"><pre><span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">pinMode</span><span class="p">(</span><span class="n">THERMISTOR_PULL_UP_PIN</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+  <span class="c1">// Start scale</span>
+  <span class="n">scale</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">LOADCELL_DOUT_PIN</span><span class="p">,</span> <span class="n">LOADCELL_SCK_PIN</span><span class="p">);</span>
+	<span class="n">scale</span><span class="p">.</span><span class="n">tare</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">scale</span><span class="p">.</span><span class="n">is_ready</span><span class="p">())</span> <span class="p">{</span>
+    <span class="kt">float</span> <span class="n">temperature</span> <span class="o">=</span> <span class="n">get_temp</span><span class="p">(</span><span class="n">thermistor_temperature</span><span class="p">);</span>
+    <span class="kt">float</span> <span class="n">volume</span> <span class="o">=</span> <span class="n">scale</span><span class="p">.</span><span class="n">get_units</span><span class="p">()</span><span class="o">/</span><span class="n">get_density</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">water_density</span><span class="p">);</span>
+
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"celsius: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">", mililiter: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"HX711 not found"</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">delay</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>And we successfully measure temperature and volume of water inside a container. I made some modifications to the program to add commands for tareing and measuring the temperature only once. So when we change containers we can retare without restarting the program. and also to measure temperature once so we don’t have to hold the thermistor in the water.</p>
+
+<p>The code is accessible <a href="https://github.com/Tristaan/arduino-load-cell">here</a>.</p>
+
+<p>And here we have readings:
+<img src="/files/meritve_arduino.png" alt="Readings from arduino" /></p>
+
+<p>And also the chart from 0 to 500ml at 21.48°C:
+<img src="/files/karakteristika.png" alt="Characteristic" /></p>
+
+  </div><a class="u-url" href="/electronics/2021/01/12/load-cell.html" hidden></a>
+</article>
+
+            </div>
+        </main>
+				<style>
+    #cookie-notice {padding: 0.5rem 1rem; display: none; text-align: center; position: fixed; bottom: 0; width: calc(100% - 2rem); background: #222; color: rgba(255,255,255,0.8);}
+    #cookie-notice a {display: inline-block; cursor: pointer; margin-left: 0.5rem;}
+    @media (max-width: 767px) {
+        #cookie-notice span {display: block; padding-top: 3px; margin-bottom: 1rem;}
+        #cookie-notice a {position: relative; bottom: 4px;}
+    }
+</style>
+<div id="cookie-notice"><span>We would like to use third party cookies and scripts to improve the functionality of this website.</span><a id="cookie-notice-accept" class="btn btn-primary btn-sm">Approve</a><a href="/privacy" class="btn btn-primary btn-sm">More info</a></div>
+<script>
+    function createCookie(name,value,days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + expires + "; path=/";
+    }
+    function readCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0;i < ca.length;i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
+    }
+    function eraseCookie(name) {
+        createCookie(name,"",-1);
+    }
+
+    if(readCookie('cookie-notice-dismissed')=='true') {
+			// Enter Includes here
+    } else {
+        document.getElementById('cookie-notice').style.display = 'block';
+    }
+    document.getElementById('cookie-notice-accept').addEventListener("click",function() {
+        createCookie('cookie-notice-dismissed','true',31);
+        document.getElementById('cookie-notice').style.display = 'none';
+        location.reload();
+    });
+
+</script>
+
+        <script>
+menuLink.onclick=function(a){a.preventDefault();var e="active";layout.className=layout.className==e?"":e};
+donateButton.onclick=function(a){a.preventDefault();var e="active";donate.className=donate.className==e?"":e};
+        </script>
+    </body>
+</html>

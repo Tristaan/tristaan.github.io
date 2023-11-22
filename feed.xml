@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.3">Jekyll</generator><link href="https://sneider.si/feed.xml" rel="self" type="application/atom+xml" /><link href="https://sneider.si/" rel="alternate" type="text/html" /><updated>2023-11-22T20:23:47+00:00</updated><id>https://sneider.si/feed.xml</id><title type="html">sneider.si</title><subtitle>Find some nifty guides, rants and information about a computer service provider.</subtitle><author><name>tristan</name></author><entry><title type="html">Linux mouse driver</title><link href="https://sneider.si/linux/drivers/reverse-engineering/2023/04/18/linux-mouse-driver.html" rel="alternate" type="text/html" title="Linux mouse driver" /><published>2023-04-18T00:00:00+00:00</published><updated>2023-04-18T00:00:00+00:00</updated><id>https://sneider.si/linux/drivers/reverse-engineering/2023/04/18/linux-mouse-driver</id><content type="html" xml:base="https://sneider.si/linux/drivers/reverse-engineering/2023/04/18/linux-mouse-driver.html"><![CDATA[<p>This is a nearly 3-year-old project of mine. It started out as a <a href="https://github.com/tristaan/strix-claw">libusb userspace driver</a> just to make it work and keep it from crashing all the time. Now I’m revisiting this driver and rewriting it as a kernel module.</p>
+
+<h2 id="the-mouse">The mouse</h2>
+<p>The mouse is an <a href="https://www.asus.com/Keyboards-Mice/STRIX_CLAW/">ASUS Strix Claw</a> which has 3 special buttons for DPI settings.
+It is configurable through a windows program, but the goal is to get this functionality working on linux.</p>
+
+<h2 id="reverse-engineering-the-payload">Reverse engineering the payload</h2>
+<p>So to get the device working on linux we first need to gather information on what data is even sent to/from the device.
+I started monitoring the communication with <a href="https://www.wireshark.org/">Wireshark</a> on a windows machine and found out that this device has 3 interfaces:</p>
+<ol>
+  <li>Mouse &amp; Configuration</li>
+  <li>Keyboard Macros</li>
+  <li>DPI buttons</li>
+</ol>
+
+<h3 id="mouse--configuration">Mouse &amp; Configuration</h3>
+<p>On this interface (more precise endpoint1) the communication is like on any other mouse. The mouse sends movement &amp; button data to the pc and works normally without any problems. it sends 8 bytes every change.
+There is also a second endpoint0 which is used for configuration purposes and from what I read is default on most USB devices. The configuration program uses this endpoint to change the devices settings. It sends 8 bytes per transmission, which happens 14 times per configuration change.</p>
+
+<p>I described all the configuration bytes, which you can see this in this photo. Please note that I skipped keyboard macro configuration because the payloads were really huge + I don’t need keyboard macros on the mouse.
+IMG IMG</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="keyboard-macros">Keyboard Macros</h3>
+<p>Whenever a keyboard macro button is pressed the buttons presses come from interface1. It acts as a virtual keyboard and works perfectly fine as is.</p>
+
+<h3 id="dpi-buttons">DPI buttons</h3>
+<p>Now this is the problematic interface (endpoint3). Every time a button is pressed from this interface the mouse just locks up. Even the other eps stop working. I’m not 100% sure why this happens, but it should be because the interrupt for the payload is never triggered on the host, this causes then the device to lock up because of filled buffer. (??)</p>
+
+<p>The endpoint reports the current DPI level &amp; Sniper mode status on every press of these 3 buttons.
+This is really useful and can even be made as a widget if there is a proper underlying driver which reports this information to userspace. So this is what we will be working on.</p>
+
+<h2 id="current-mouse-status-inside-the-kernel">Current mouse status inside the kernel</h2>
+<p>All the interfaces from the mouse are registered as hid-generic devices. So I tried to use a simple skeleton driver to bind to the third interface but it was not working because the hidcore takes precedence. I could use udev rules to block hidcore, but then again this adds unnecessary installation steps, which I want to avoid. So what we’ll assume is that the vendor defined HID descriptor is defective.</p>
+
+<p>So after reading countless kernel source codes and a bit of kernel docs, all the while trying out a custom driver I noticed that something may be wrong with the sent packet amount and the expected packet amount, so a custom HID descriptor won’t do.
+The problem lies deeper, so a custom USB driver is necessary, but as time is a scarce resource a recommendation comes to mind; use the available hacked-together userspace driver mentioned above.</p>
+
+<h2 id="custom-usb-driver-learnings">Custom USB Driver learnings</h2>
+<p>So as interest was stronger than the lack of time I started hacking a mouse driver together from the steam-controller driver, the hid_ll_driver (usbhid) functions for request actually never get called. So here i am, stuck. Maybe some other time.</p>]]></content><author><name>tristan</name></author><category term="linux" /><category term="drivers" /><category term="reverse-engineering" /><category term="linux" /><category term="gaming" /><category term="drivers" /><category term="asus" /><summary type="html"><![CDATA[This is a nearly 3-year-old project of mine. It started out as a libusb userspace driver just to make it work and keep it from crashing all the time. Now I’m revisiting this driver and rewriting it as a kernel module.]]></summary></entry><entry><title type="html">Wine Barrel Smoker</title><link href="https://sneider.si/hobby/meat-smoker/2022/03/20/wine-barrel-smoker.html" rel="alternate" type="text/html" title="Wine Barrel Smoker" /><published>2022-03-20T00:00:00+00:00</published><updated>2022-03-20T00:00:00+00:00</updated><id>https://sneider.si/hobby/meat-smoker/2022/03/20/wine-barrel-smoker</id><content type="html" xml:base="https://sneider.si/hobby/meat-smoker/2022/03/20/wine-barrel-smoker.html"><![CDATA[<p>There is one wine barrel that lies around in my backyard and I didn’t want to throw it away so I thought of something to do with it. I checked the interwebs for some guidance where I found some Youtube videos which seemed quite helpful and some textual guides, which were only practical when there were pictures included.</p>
+
+<ol>
+  <li><a href="https://www.youtube.com/watch?v=_dRfooepkLE">Wine Barrel Smoker</a></li>
+  <li><a href="https://www.youtube.com/watch?v=yiMf1nslsRo">How to build a Wine Barrel Smoker</a></li>
+  <li>
+    <p>How to make a wine barrel smoker <a href="https://www.youtube.com/watch?v=rE7hkvlOx5I">Part 1</a> &amp; <a href="https://www.youtube.com/watch?v=y_i-ygVAwR4">Part 2</a></p>
+  </li>
+  <li><a href="https://www.doityourself.com/stry/make-a-wine-barrel-smoker">DoItYourself.com</a></li>
+  <li><a href="https://www.instructables.com/id/Whiskey-Barrel-BBQ-Smoker/">Instructables.com</a></li>
+  <li><a href="http://mywinebarrelsmoker.blogspot.com/2014/04/my-wine-barrel-smoker-build.html">blogspot.com</a></li>
+</ol>
+
+<h2 id="the-initial-idea">The initial idea</h2>
+<p>All these people that made these smokers, didn’t really upload any plans for the smokers, they just made it from their mind. So I thought to myself, why not create one with included drawings, which makes it easier for others to improve based on my designs and ultimately lead to the best possible wine barrel smoker.</p>
+
+<p>Here is the BOM and simple drawing of the barrel with steps written down, but sadly it’s in Slovenian:
+<img src="/files/IMG_20210911_224932.jpg" alt="Barrel drawings" /></p>
+
+<h2 id="the-annoying-part">The annoying part</h2>
+<p>The planks and barrel hoops need to be screwed together, because splitting the barrel into two pieces can make it fall apart. Video No. 4 shows that tightening the hoops by hitting them towards the belly of the barrel is also an option, but I did not choose this way because it doesn’t look everlasting. I went with screws.
+This takes some time, some of the other people said it takes from 1-2 hours, but it took me 2 hours.</p>
+
+<p><img src="/files/IMG_20190207_144414.jpg" alt="Barrel hoops screwed" /></p>
+
+<p>I also added some wheels to keep it portable as much as possible.</p>
+
+<p><img src="/files/IMG_20190207_170038.jpg" alt="Barrel wheels" /></p>
+
+<h2 id="the-split">The split</h2>
+<p>After the screwing was done, I used my Bosch circular saw which has a distancer included. I used it to measure of about <em>15</em> centimeters from the top and then just cut straight around the barrel. This was quite a straight forward task because of the tools available. But as i am a professional the cutting wasn’t as good as could be, it was a bit zigzag which I solved with heat resistant silicone.
+<img src="" alt="Bosch circular saw with distancer" />
+<img src="/files/IMG_20190207_183207.jpg" alt="Barrel cut apart" /></p>
+
+<h2 id="the-heat-resistant-silicone">The heat resistant silicone</h2>
+<p>Because of the zigzag cuts i had to use some silicone to make it air-tight(er). Before adding the silicone I screwed the two pieces together with a hinge to keep it positioned correctly.
+<img src="/files/IMG_20190907_004618.jpg" alt="Silicone on barrel" />
+The silicone at the sides was added because of the shrinking of the wood.
+I used some food foil on the silicone and put the top part onto it to not make it stick to the top part and still make it a snug fit.
+<img src="/files/IMG_20190908_144301.jpg" alt="Silicone on barrel with foil" /></p>
+
+<h2 id="two-chains-to-keep-it-open">Two chains to keep it open</h2>
+<p>I also added two chains at the sides to make it stay open at a certain angle as can be seen in the picture:
+<img src="/files/IMG_20190908_155401.jpg" alt="Two chains" /></p>
+
+<h2 id="the-finished-product-and-intakeexhaust">The finished product and intake/exhaust</h2>
+<p>The intake and exhaust were made twice, as the initial pipes were not enough, so i added holes for smoker intakes. 
+<img src="/files/IMG_20230418_191725.jpg" alt="Finished 1" /></p>
+
+<p>It’s still a barrel, but man does the smoked food taste good. I mostly smoke fish with it because of the barrel wood, to not ruin it. As fish is smoked at a lower temperature.
+<img src="/files/IMG_20230418_191736.jpg" alt="Finished 2" /></p>]]></content><author><name>tristan</name></author><category term="hobby" /><category term="meat-smoker" /><category term="meat" /><category term="wine" /><category term="barrel" /><summary type="html"><![CDATA[There is one wine barrel that lies around in my backyard and I didn’t want to throw it away so I thought of something to do with it. I checked the interwebs for some guidance where I found some Youtube videos which seemed quite helpful and some textual guides, which were only practical when there were pictures included.]]></summary></entry><entry><title type="html">Using the Atmel ATSAM3X8E on linux</title><link href="https://sneider.si/electronics/2021/03/10/sam3x8e.html" rel="alternate" type="text/html" title="Using the Atmel ATSAM3X8E on linux" /><published>2021-03-10T00:00:00+00:00</published><updated>2021-03-10T00:00:00+00:00</updated><id>https://sneider.si/electronics/2021/03/10/sam3x8e</id><content type="html" xml:base="https://sneider.si/electronics/2021/03/10/sam3x8e.html"><![CDATA[<p>You might know the SAM3X8E from the Arduino Due, which can be quite easy to program using the arduino IDE. But how can you compile for and program the Atmel microcontroller directly using the native USB port? The information on this subject was scarce so I made a guide which may help you! This can work with all the devices that Microchip ASF supports.</p>
+
+<h2 id="requirements">Requirements</h2>
+<p>So, to get up and running you need a couple of things:</p>
+
+<ol>
+  <li>Arduino Due -&gt; <a href="https://www.arduino.cc/en/pmwiki.php?n=Main/ArduinoBoardDue">arduino.cc</a></li>
+  <li>ASF -&gt; <a href="https://www.microchip.com/en-us/development-tools-tools-and-software/libraries-code-examples-and-more/advanced-software-framework-for-sam-devices">microchip.com</a></li>
+  <li>OpenOCD -&gt; <a href="https://docs.platformio.org/en/latest/core/installation.html#installation-methods">openocd.org</a>
+    <ul>
+      <li>If you have an OpenOCD JTAG debugger, which can be practical to debug your program</li>
+    </ul>
+  </li>
+  <li>arm-none-eabi-gcc <a href="https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads">developer.arm.com</a>
+    <ul>
+      <li>Find this package using your distros package manager if available. You might also need the newlib package.</li>
+    </ul>
+  </li>
+  <li>BOSSA -&gt; <a href="http://www.shumatech.com/web/products/bossa">shumatech.com</a></li>
+</ol>
+
+<p>We’ll be using Arduino Due and it’s <strong>native USB</strong> port. This can work with other ARM based microcontrollers from Atmel/Microchip that are supported by the ASF library, but this guide is AT91SAM3X8E specific.</p>
+
+<h2 id="bossa">BOSSA</h2>
+<p>First we’ll install the BOSSA toolset, which is needed to upload the compiled firmware onto the Atmel chip. In this guide we will install from source. First clone <a href="https://github.com/shumatech/BOSSA">this repo</a> and run <code class="language-plaintext highlighter-rouge">make install</code> inside of it. Then copy the generated files inside <code class="language-plaintext highlighter-rouge">bin</code> dir into <code class="language-plaintext highlighter-rouge">/usr/local/bin</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>git clone https://github.com/shumatech/BOSSA
+<span class="nb">cd </span>BOSSA
+make <span class="nb">install
+sudo cp </span>bin/<span class="o">{</span>bossa,bossac,bossash<span class="o">}</span> /usr/local/bin
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Now connect your board using the native USB port and test if BOSSA is working as expected: <code class="language-plaintext highlighter-rouge">bossac -i</code>. This should print out info about the board. If you have multiple serial devices connected to your PC, you might need to specify <code class="language-plaintext highlighter-rouge">-p &lt;port&gt;</code> to set the port used by the Arduino Due. If you connected it correctly and the board is still not displayed, try erasing and resetting the board using it’s built-in buttons.</p>
+
+<h2 id="asf-and-project-initialization">ASF and project initialization</h2>
+<p>ASF is a big feature packed framework for working with SAM and other Atmel devices. It also includes code examples which we’ll use to set up our custom project. Download ASF <a href="https://www.microchip.com/en-us/development-tools-tools-and-software/libraries-code-examples-and-more/advanced-software-framework-for-sam-devices">here</a>. Extract it and take a look around. It has many useful libraries.
+To set up our project we will create a directory which will serve as your project root. Copy xdk-asf-3.49.1 that you extracted into your project root. You can also rename it for easier configuration changes.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="nb">mkdir</span> &lt;project_root&gt;
+unzip asf-standalone-archive-3.49.1.105.zip
+<span class="nb">mv </span>xdk-asf-3.49.1 &lt;project_root&gt;/asf
+<span class="nb">cd</span> &lt;project_root&gt;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>If you checked there are a couple of applications inside the folders which include makefiles which we can use as a starting point.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre><span class="nb">mkdir </span>include
+<span class="nb">cp </span>asf/sam/applications/getting-started/sam3x8e_arduino_due_x/gcc/<span class="k">*</span> <span class="nb">.</span>
+<span class="nb">cp </span>asf/sam/utils/make/Makefile.sam.in Makefile
+<span class="nb">mv </span>asf.h include/.
+<span class="nb">mkdir </span>src
+<span class="nb">cp </span>asf/sam/applications/getting-started/main.c src/.
+<span class="nb">cp </span>asf/sam/applications/getting-started/sam3x8e_arduino_due_x/conf_<span class="k">*</span> include/.
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="configuration">Configuration</h2>
+<p>The files are prepared and now we’ll configure the <code class="language-plaintext highlighter-rouge">config.mk</code> file which holds the paths for sources and header files which must be compiled and included. As you might have noticed we added some custom directory structure to the project, which is good so it’s tidied up. we must reflect these changes inside our config file.
+Open up <strong>config.mk</strong>. Set the <code class="language-plaintext highlighter-rouge">PRJ_PATH</code> to <code class="language-plaintext highlighter-rouge">asf</code> (the directory your ASF is located at). Next change the <code class="language-plaintext highlighter-rouge">TARGET_FLASH</code> and <code class="language-plaintext highlighter-rouge">TARGET_SRAM</code> to your project name for <a href="https://library.stanford.edu/research/data-management-services/data-best-practices/best-practices-file-naming">better file names</a>. The <code class="language-plaintext highlighter-rouge">CSRCS</code> directive contains all the .c files that are used in your project. Change the <code class="language-plaintext highlighter-rouge">getting-started/main.c</code> entry into <code class="language-plaintext highlighter-rouge">../src/main</code>. Notice that we added two dots in front of it, because of the <strong>PRJ_PATH</strong> being set to a directory inside your project. Next we’ll edit the <code class="language-plaintext highlighter-rouge">INC_PATH</code>, remove the two <code class="language-plaintext highlighter-rouge">getting-started</code> entries and add <code class="language-plaintext highlighter-rouge">../include</code>. Note the trailing backslash it must be there so that makes the multiple lines as a single one. Feel free to edit the other options if needed, but mostly you’ll just need <strong>CSRCS</strong> and <strong>INC_PATH</strong>. The defaults include a couple of services and drivers which you can use to create your program.</p>
+
+<h2 id="building-and-uploading">Building and uploading</h2>
+<p>To upload you need to have the boards native USB port plugged in.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>make
+bossac <span class="nt">-e</span> <span class="nt">-w</span> <span class="nt">-v</span> <span class="nt">-b</span> &lt;TARGET_FLASH&gt;.bin
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Now reset the Arduino and check if the L LED is blinking. To reupload the program you must erase the flash &amp; reset.
+Congratulations, you have successfully set up Arduino Due with ASF.</p>
+
+<h2 id="openocd">OpenOCD</h2>
+<p>OpenOCD is a tool that creates a gdb server for the OpenOCD supporting JTAG adapter.
+OpenOCD is configured using the openocd.cfg file. We need to use the Olimex ARM-USB-OCD-H tool and specify the SAM3X8E board. Create openocd.cfg in your project root and fill it like so:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>source [find interface/ftdi/olimex-arm-usb-ocd-h.cfg]
+source [find target/at91sam3ax_8x.cfg]
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Also create a new folder called <code class="language-plaintext highlighter-rouge">gdb_scripts</code> and copy the <code class="language-plaintext highlighter-rouge">DEBUG_SCRIPT_FLASH</code> from <strong>config.mk</strong> into it. Edit it and modify the <code class="language-plaintext highlighter-rouge">target remote localhost:2331</code> to <code class="language-plaintext highlighter-rouge">target extended-remote localhost:3333</code> and some additional settings like depicted below. Modify the <code class="language-plaintext highlighter-rouge">DEBUG_SCRIPT_FLASH</code> in <strong>config.mk</strong> to point to <code class="language-plaintext highlighter-rouge">../gdb_scripts/arduino_due_x_flash.gdb</code></p>
+
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre></td><td class="rouge-code"><pre><span class="n">define</span> <span class="n">reset</span>
+<span class="n">target</span> <span class="n">extended</span>-<span class="n">remote</span> <span class="n">localhost</span>:<span class="m">3333</span>
+
+<span class="n">set</span> <span class="n">remotetimeout</span> <span class="m">50</span>
+<span class="n">set</span> <span class="n">tcp</span> <span class="n">connect</span>-<span class="n">timeout</span> <span class="m">5</span>
+<span class="n">set</span> <span class="n">tcp</span> <span class="n">auto</span>-<span class="n">retry</span> <span class="n">off</span>
+<span class="n">set</span> <span class="n">remote</span> <span class="n">hardware</span>-<span class="n">breakpoint</span>-<span class="n">limit</span> <span class="m">6</span>
+<span class="n">set</span> <span class="n">remote</span> <span class="n">hardware</span>-<span class="n">watchpoint</span>-<span class="n">limit</span> <span class="m">4</span>
+<span class="n">set</span> <span class="n">target</span>-<span class="n">async</span> <span class="n">on</span>
+<span class="n">set</span> <span class="n">mem</span> <span class="n">inaccessible</span>-<span class="n">by</span>-<span class="n">default</span> <span class="n">off</span>
+<span class="n">set</span> <span class="n">breakpoint</span> <span class="n">pending</span> <span class="n">off</span>
+
+<span class="n">monitor</span> <span class="n">reset</span> <span class="n">init</span>
+
+<span class="n">load</span>
+
+<span class="n">info</span> <span class="n">reg</span>
+
+<span class="n">end</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>Then after building and uploading your program, run <code class="language-plaintext highlighter-rouge">openocd</code> which will create a gdb server which you can connect to using gdb! Use the command <code class="language-plaintext highlighter-rouge">make debug_flash</code> to connect to openocd.
+There is a handy guide on how to create breakpoints, read and write registers <a href="https://www.tincantools.com/gdb-debugger-with-openocd/">here</a>, check out no. 5. But watch out when you use continue when you delete all breakpoints, use <code class="language-plaintext highlighter-rouge">monitor resume</code> instead.</p>]]></content><author><name>tristan</name></author><category term="electronics" /><category term="arduino" /><category term="arm" /><category term="atmel" /><summary type="html"><![CDATA[You might know the SAM3X8E from the Arduino Due, which can be quite easy to program using the arduino IDE. But how can you compile for and program the Atmel microcontroller directly using the native USB port? The information on this subject was scarce so I made a guide which may help you! This can work with all the devices that Microchip ASF supports.]]></summary></entry><entry><title type="html">Arduino load cell</title><link href="https://sneider.si/electronics/2021/01/12/load-cell.html" rel="alternate" type="text/html" title="Arduino load cell" /><published>2021-01-12T00:00:00+00:00</published><updated>2021-01-12T00:00:00+00:00</updated><id>https://sneider.si/electronics/2021/01/12/load-cell</id><content type="html" xml:base="https://sneider.si/electronics/2021/01/12/load-cell.html"><![CDATA[<p>This project started out as an assignment for school, where we had to create a measurement system from selected sensors, to measure volume. I chose a load cell for getting the mass and a thermistor to get the temperature for temp variable density.</p>
+
+<h2 id="requirements">Requirements</h2>
+<p>To successfully create this measurement system we require couple of components for which I’ll include links.</p>
+
+<ol>
+  <li>Arduino Uno -&gt;<a href="https://store.arduino.cc/arduino-uno-rev3-smd">Official store</a></li>
+  <li>HX711 &amp; Load cell -&gt;<a href="https://www.amazon.de/gp/product/B07MY35F92">Amazon</a></li>
+  <li>Thermistor -&gt; <a href="https://www.adafruit.com/product/372">Adafruit</a></li>
+  <li>10k Resistor -&gt; <a href="https://www.adafruit.com/product/2784">Adafruit</a></li>
+  <li>Wires -&gt; <a href="https://www.adafruit.com/product/153">Adafruit</a></li>
+  <li>Breadboard -&gt; <a href="https://www.adafruit.com/product/64">Adafruit</a></li>
+  <li>3D printed parts -&gt; <a href="https://www.thingiverse.com/thing:3129439">Thingiverse</a> (I recommend using the bigger bottom part)
+OR you can create your own testbed from wood if you have the woodworking skills.</li>
+  <li>Arduino IDE with HX711 library -&gt; <a href="https://www.arduino.cc/en/software">IDE</a></li>
+  <li>Reference weight</li>
+</ol>
+
+<p>The HX711 &amp; Load cell come unsoldered, so you also must <a href="https://content.instructables.com/ORIG/FH7/R58E/J7UR7KPT/FH7R58EJ7UR7KPT.jpg?auto=webp&amp;frame=1&amp;width=1024&amp;fit=bounds&amp;md=a578cb5e055ee72a8411256e2287530d">solder</a> them together or find an already soldered pair. You can also use your own custom parts, but keep in mind that you’ll have a different lookup table for the thermistor. The load cells parameters will also be different, but they are different from cell to cell.
+Arduino IDE comes with a library manager built-in so you need to install the HX711 library. I won’t cover how to do this in this guide because it’s just a google away.</p>
+
+<h2 id="load-cell-testbed">Load cell testbed</h2>
+<p><img src="/files/bremenska_celica.jpg" alt="Load cell test bed" /></p>
+
+<h2 id="wiring">Wiring</h2>
+<p><img src="/files/arduino_povezave.png" alt="Wiring diagram" /></p>
+
+<p>The HX711 breakout board in the diagram is different from the HX711 used, but the pinouts are the same.
+The DATA and SCK pins from HX711 got to 8 and 9 respectively. The GND and VCC pins connect to GND and 5V. Following the wiring of the HX711 breakout board, the thermistor wiring is a tad bit more complicated, because it uses a pullup resistor. We use the pullup resistor because we don’t want the analog input pin A0 to float. We also use a trick where we don’t connect the pullup resistor to 5V, instead we connect it to a digital I/O pin which we will set <strong>HIGH</strong> (5V) only when measuring. This helps to prevent the current from flowing through the thermistor when not used and keeps the power dissipation lowest. So connect one end of the resistor to I/O pin number 2, the other end to one of the thermistor pins, the other end of the thermistor to GND and connect the analog pin A0 to the junction of the thermistor and resistor.</p>
+
+<p>So now we have our wiring completed. Feel free to use different pins for connection but also change the pins in the configuration.</p>
+
+<h2 id="basic-program">Basic program</h2>
+<p>Start Arduino IDE and create a new project.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+</pre></td><td class="rouge-code"><pre><span class="cp">#include</span> <span class="cpf">"HX711.h"</span><span class="cp">
+</span>
+<span class="c1">// Constants</span>
+<span class="c1">// pull up resistor resistance</span>
+<span class="cp">#define TEMPRESISTOR 10000
+</span>
+<span class="c1">// Wiring</span>
+<span class="cp">#define THERMISTOR_PIN A0
+#define THERMISTOR_PULL_UP_PIN 2
+#define LOADCELL_DOUT_PIN 8
+#define LOADCELL_SCK_PIN 9
+</span><span class="n">HX711</span> <span class="n">scale</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">pinMode</span><span class="p">(</span><span class="n">THERMISTOR_PULL_UP_PIN</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+  <span class="c1">// Start scale</span>
+  <span class="n">scale</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">LOADCELL_DOUT_PIN</span><span class="p">,</span> <span class="n">LOADCELL_SCK_PIN</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">scale</span><span class="p">.</span><span class="n">is_ready</span><span class="p">())</span> <span class="p">{</span>
+    <span class="kt">float</span> <span class="n">load_cell</span> <span class="o">=</span> <span class="n">scale</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+    <span class="kt">float</span> <span class="n">thermistor</span> <span class="o">=</span> <span class="n">analogRead</span><span class="p">(</span><span class="n">THERMISTOR_PIN</span><span class="p">);</span>
+
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"load_cell: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">load_cell</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">", thermistor: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">thermistor</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"HX711 not found"</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">delay</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>As you can see in the defines if you have different connections change the pin constants accordingly.
+We have our basic program that prints the received readings to the serial interface of Arduino IDE. As you might suspect this program returns raw values, but we want them to be in <strong>°C</strong> and <strong>ml</strong>. First we need to get the calibration factor for the HX711 library. Everything the library does with the factor is divide the reading with the calibration factor. To get this factor we first add <code class="highlight language-c" data-lang="c"><span class="kt">float</span> <span class="n">calibration_factor</span> <span class="o">=</span> <span class="mi">736</span><span class="p">.</span><span class="mi">175</span><span class="p">;</span></code> above the setup function. Then we add two lines into the setup function.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="n">scale</span><span class="p">.</span><span class="n">set_scale</span><span class="p">(</span><span class="n">calibration_factor</span><span class="p">);</span>
+<span class="n">scale</span><span class="p">.</span><span class="n">tare</span><span class="p">();</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>And change the <code class="language-plaintext highlighter-rouge">scale.read()</code> to <code class="language-plaintext highlighter-rouge">scale.get_units()</code>.</p>
+
+<p>Now you have everything prepared to set your calibration factor.</p>
+
+<ol>
+  <li>Run the program without any weight</li>
+  <li>Place the reference weight on the load cell</li>
+  <li>Increase the factor if read value is too high or decrease if the value is too low</li>
+  <li>Repeat the process until the weight read and actual reference weight match</li>
+</ol>
+
+<p>You could also write a simple addition to the program which adds/subtracts based on user input through serial. Like so:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre><span class="k">if</span><span class="p">(</span><span class="n">Serial</span><span class="p">.</span><span class="n">available</span><span class="p">()</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">char</span> <span class="n">command</span> <span class="o">=</span> <span class="n">Serial</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+  <span class="k">switch</span><span class="p">(</span><span class="n">command</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="sc">'+'</span><span class="p">:</span>
+      <span class="n">calibration_factor</span><span class="o">+=</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">;</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="k">case</span> <span class="sc">'-'</span><span class="p">:</span>
+      <span class="n">calibration_factor</span><span class="o">-=</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">;</span>
+      <span class="k">break</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">scale</span><span class="p">.</span><span class="n">set_scale</span><span class="p">(</span><span class="n">calibration_factor</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>Place it just above the <code class="language-plaintext highlighter-rouge">delay(200)</code> line. This is practical for finetuning, but when starting off it’s easier to change the value in bigger amounts and recompiling.</p>
+
+<h2 id="getting-the-volume">Getting the volume</h2>
+<p>Volume is calculated like so: \(V = \frac{m}{\rho(T)}\). Where m is <strong>mass</strong> (which we have) and \(\rho(T)\) is <strong>density</strong>. Now we want to convert the thermistor resistance to temperature to density. This can be accomplished with so called lookup tables, because the temperature in relation to resistance doesn’t follow a known curve (approximations exist, but we will not use them here).</p>
+
+<p>A lookup table is a simple table with value A in one column and value B in the second. We can’t create a lookup table for all possible values so we <a href="https://en.wikipedia.org/wiki/InterpolationjG">Interpolate</a> if we receive a reading that is <strong>between</strong> values from the lookup table. We do the same to get the density from temperature. In total we will have two lookup tables. One for the <strong>thermistor resistance temperature</strong> relationship and one for the <strong>density temperature</strong> relationship which are located <a href="https://github.com/Tristaan/arduino-load-cell/blob/master/lookup_tables.h">here</a>.</p>
+
+\[y=y_0+(y_1 - y_0)\frac{x - x_0}{x_1 - x_0}\]
+
+<p>Place the header file into your project directory and include it in the main .ino file: <code class="highlight language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">"lookup_tables.h"</span></code></p>
+
+<h2 id="getting-the-density">Getting the density</h2>
+<p>We create a function that uses the thermistor lookup table and turns the resistance into temperature.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre></td><td class="rouge-code"><pre><span class="c1">// Function to get temperature from thermistor</span>
+<span class="kt">float</span> <span class="nf">get_temp</span><span class="p">(</span><span class="kt">float</span> <span class="n">data</span><span class="p">[</span><span class="mi">101</span><span class="p">][</span><span class="mi">2</span><span class="p">]){</span>
+  <span class="kt">float</span> <span class="n">reading</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="c1">// Only 5V when reading from thermistor, prevent heating</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">THERMISTOR_PULL_UP_PIN</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+  <span class="c1">// Read 10 values and calculate average</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+    <span class="n">reading</span> <span class="o">+=</span> <span class="n">analogRead</span><span class="p">(</span><span class="n">THERMISTOR_PIN</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">THERMISTOR_PULL_UP_PIN</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+  <span class="n">reading</span> <span class="o">=</span> <span class="n">reading</span><span class="o">/</span><span class="mi">10</span><span class="p">;</span>
+  <span class="c1">// Get resistance of thermistor from reading</span>
+  <span class="n">reading</span> <span class="o">=</span> <span class="n">TEMPRESISTOR</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1023</span><span class="o">/</span><span class="n">reading</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="c1">// Get temperature from lookup table (linear interpolation)</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">101</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">reading</span> <span class="o">&lt;=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">reading</span> <span class="o">&gt;</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="p">((</span><span class="n">reading</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]))));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>Place it at the bottom of the .ino file. Now what this function does is turns the I/O pin where the resistor is connected <strong>HIGH</strong> (to 5V), reads 10 values from the thermistor, divides by 10 so we get the average and turns the A/D value into resistance. Then it finds the range between which the reading is and interpolates to get the approximated value. We could have also used polynomial interpolation, but for the sake of simplicity we didn’t. we return a -1 if the reading is out of bounds of the lookup table.
+We also do the same for density, where the variable is temperature instead of resistance.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre><span class="c1">// Function to get density from temperature</span>
+<span class="kt">float</span> <span class="nf">get_density</span><span class="p">(</span><span class="kt">float</span> <span class="n">temperature</span><span class="p">,</span> <span class="kt">float</span> <span class="n">data</span><span class="p">[</span><span class="mi">34</span><span class="p">][</span><span class="mi">2</span><span class="p">]){</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">34</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">temperature</span> <span class="o">&gt;=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">temperature</span> <span class="o">&lt;</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="p">((</span><span class="n">temperature</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]))));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>Place it above or below the <code class="language-plaintext highlighter-rouge">get_temp()</code> function.</p>
+
+<p>Now we want to use those functions in the main loop. This is quite easy, we just need to replace a couple of lines.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+</pre></td><td class="rouge-code"><pre><span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">pinMode</span><span class="p">(</span><span class="n">THERMISTOR_PULL_UP_PIN</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+  <span class="c1">// Start scale</span>
+  <span class="n">scale</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">LOADCELL_DOUT_PIN</span><span class="p">,</span> <span class="n">LOADCELL_SCK_PIN</span><span class="p">);</span>
+	<span class="n">scale</span><span class="p">.</span><span class="n">tare</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">scale</span><span class="p">.</span><span class="n">is_ready</span><span class="p">())</span> <span class="p">{</span>
+    <span class="kt">float</span> <span class="n">temperature</span> <span class="o">=</span> <span class="n">get_temp</span><span class="p">(</span><span class="n">thermistor_temperature</span><span class="p">);</span>
+    <span class="kt">float</span> <span class="n">volume</span> <span class="o">=</span> <span class="n">scale</span><span class="p">.</span><span class="n">get_units</span><span class="p">()</span><span class="o">/</span><span class="n">get_density</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">water_density</span><span class="p">);</span>
+
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"celsius: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">", mililiter: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"HX711 not found"</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">delay</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>And we successfully measure temperature and volume of water inside a container. I made some modifications to the program to add commands for tareing and measuring the temperature only once. So when we change containers we can retare without restarting the program. and also to measure temperature once so we don’t have to hold the thermistor in the water.</p>
+
+<p>The code is accessible <a href="https://github.com/Tristaan/arduino-load-cell">here</a>.</p>
+
+<p>And here we have readings:
+<img src="/files/meritve_arduino.png" alt="Readings from arduino" /></p>
+
+<p>And also the chart from 0 to 500ml at 21.48°C:
+<img src="/files/karakteristika.png" alt="Characteristic" /></p>]]></content><author><name>tristan</name></author><category term="electronics" /><category term="arduino" /><category term="load cell" /><category term="wiring diagram" /><category term="volume sensor" /><category term="measurement" /><summary type="html"><![CDATA[This project started out as an assignment for school, where we had to create a measurement system from selected sensors, to measure volume. I chose a load cell for getting the mass and a thermistor to get the temperature for temp variable density.]]></summary></entry><entry><title type="html">Rails appointment engine Pt.1</title><link href="https://sneider.si/sensors/electronics/2019/01/28/rails-appointments.html" rel="alternate" type="text/html" title="Rails appointment engine Pt.1" /><published>2019-01-28T00:00:00+00:00</published><updated>2019-01-28T00:00:00+00:00</updated><id>https://sneider.si/sensors/electronics/2019/01/28/rails-appointments</id><content type="html" xml:base="https://sneider.si/sensors/electronics/2019/01/28/rails-appointments.html"><![CDATA[<p>Before you start I recommend you read <a href="https://guides.rubyonrails.org/engines.html">Rails engine guide</a>
+In this guide you will get insights on building your own engine from start to finish. This engine is going to accept some settings from the main application, implement it’s own appointment specific settings and allow users to book appointments.</p>
+
+<h1 id="how-to-rails-appointments-engine">How-to Rails appointments engine</h1>
+<p>First let’s create a checklist of what the engine should receive from the main app, what settings it should have, what (and where) it should have the outputs available.</p>
+
+<p>It receives:</p>
+<ul>
+  <li>Appoinment provider model</li>
+  <li>Appoinment receiver model (or models)</li>
+</ul>
+
+<p>It sets:</p>
+<ul>
+  <li>Available times</li>
+  <li>Appoitment length</li>
+</ul>
+
+<p>It outputs:</p>
+<ul>
+  <li>Booking links</li>
+  <li>Available appointments list</li>
+  <li>Occupied appointments</li>
+</ul>
+
+<h2 id="the-appointment">The appointment</h2>
+<p>The appointment model should store information about itself:</p>
+<ul>
+  <li>id:integer</li>
+  <li>start_date:datetime</li>
+  <li>length:time</li>
+  <li>provider_id:integer</li>
+  <li>receiver_id:integer</li>
+  <li>comment:text</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>status:enum (accepted</td>
+          <td>declined</td>
+          <td>unset)</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<h3 id="generate-the-base-engine">Generate the base engine</h3>
+<p>We will use the rails generator to create a plugin with the –mountable option:
+<code class="language-plaintext highlighter-rouge">$ rails plugin new &lt;directory&gt; --mountable</code></p>
+
+<p>Then we generate the appointment model:</p>
+
+<p><code class="language-plaintext highlighter-rouge">$ rails g model appointment start_date:datetime length:time provider_id:integer receiver_id:integer provider_type:string receiver_type:string comment:text status:integer</code></p>
+
+<p>We also generate a settings model for storing appointment providers’ settings:</p>
+
+<p><code class="language-plaintext highlighter-rouge">$ rails g model setting name:string value:string provider_id:integer provider_type:string</code></p>
+
+<p>Stay tuned for Pt.2…</p>]]></content><author><name>tristan</name></author><category term="sensors" /><category term="electronics" /><category term="ruby" /><summary type="html"><![CDATA[Before you start I recommend you read Rails engine guide In this guide you will get insights on building your own engine from start to finish. This engine is going to accept some settings from the main application, implement it’s own appointment specific settings and allow users to book appointments.]]></summary></entry><entry><title type="html">Ansible Computer Management</title><link href="https://sneider.si/system-administration/deployment/2018/11/22/ansible-computer-management.html" rel="alternate" type="text/html" title="Ansible Computer Management" /><published>2018-11-22T00:00:00+00:00</published><updated>2018-11-22T00:00:00+00:00</updated><id>https://sneider.si/system-administration/deployment/2018/11/22/ansible-computer-management</id><content type="html" xml:base="https://sneider.si/system-administration/deployment/2018/11/22/ansible-computer-management.html"><![CDATA[<p>So after finding out about <strong>Ansible</strong> I took a deep dive into the documentation and made myself some scripts to auto-setup my <em>server</em> and my <em>client</em> pcs. You can find the playbooks in <a href="https://github.com/tristaan/software-provision">This</a> repo. Please note that these playbooks are heavily inspired by my personal workflow.
+<strong>Currently, this is in it’s early phase so the configuration is not so straightforward as wanted</strong></p>
+
+<h2 id="initial-setup">Initial setup</h2>
+
+<p>To start using this you’ll need to install a default installation of Archlinux on all your computers, because I made those playbooks only for Arch, but feel free to post pull requests to the repo.</p>
+
+<p>There are many guides available for installation, if you’re new and interested I recommend the official <a href="https://wiki.archlinux.org/index.php/Installation_guide">guide</a>, but if you used it before and find the installation time consuming, check out <a href="https://github.com/deadhead420/anarchy-linux">Anarchy</a>.</p>
+
+<p>After you finish the installation. Install the ssh server on all the to-be provisioned machines (Archlinux has a great <a href="https://wiki.archlinux.org/index.php/OpenSSH#Server_usage">guide</a> exactly for this).
+Now after you have all the machines prepared, with working ssh access. Clone the repo on your main machine, I keep all my repos in the <code class="language-plaintext highlighter-rouge">~/build/</code> folder.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="nb">mkdir</span> ~/build
+<span class="nb">cd</span> ~/build
+git clone https://github.com/deadhead420/anarchy-linux
+<span class="nb">cd </span>anarchy-linux
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="configuring-the-machines">Configuring the machines</h2>
+
+<p>Edit the <code class="language-plaintext highlighter-rouge">hosts.yaml</code> file with any editor you like and configure your computers, with the help of this guide.</p>
+
+<p>Edit the variables and set them according to your setup, please note that the first item in <em>hosted_websites</em> must equal <em>default_website</em>. This is for the certificates to work correctly.</p>
+
+<p>Generate a key pair in the <em>keys/</em> directory with <code class="language-plaintext highlighter-rouge">ssh-keygen</code> and set the <em>key_name</em> according to the name.</p>
+
+<p>Execute the playbooks:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>ansible-playbook <span class="nt">-i</span> hosts.yml 0_users.yaml
+ansible-playbook <span class="nt">-i</span> hosts.yml 1_initial.yaml
+ansible-playbook <span class="nt">-i</span> hosts.yml 2_daemons.yaml
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>After the playbooks are done, edit the sites in <code class="language-plaintext highlighter-rouge">/etc/nginx/sites-enabled</code> and configure them according to your needs.</p>
+
+<p>You can also customize the playbooks!</p>]]></content><author><name>tristan</name></author><category term="system-administration" /><category term="deployment" /><category term="ruby" /><category term="yaml" /><summary type="html"><![CDATA[So after finding out about Ansible I took a deep dive into the documentation and made myself some scripts to auto-setup my server and my client pcs. You can find the playbooks in This repo. Please note that these playbooks are heavily inspired by my personal workflow. Currently, this is in it’s early phase so the configuration is not so straightforward as wanted]]></summary></entry><entry><title type="html">Sensor data collection</title><link href="https://sneider.si/sensors/electronics/2018/09/17/sensor-station.html" rel="alternate" type="text/html" title="Sensor data collection" /><published>2018-09-17T00:00:00+00:00</published><updated>2018-09-17T00:00:00+00:00</updated><id>https://sneider.si/sensors/electronics/2018/09/17/sensor-station</id><content type="html" xml:base="https://sneider.si/sensors/electronics/2018/09/17/sensor-station.html"><![CDATA[<p>This project started out as a small test if it’s even possible to read sensor data into a MVC app like there are <a href="https://thingsboard.io/">ThingsBoard</a>, <a href="https://thingspeak.com/">ThingSpeak</a> and many more. To tune this for your own station, you need to understand a bit about <strong>Ruby on Rails</strong> and <strong>Arduino</strong>.</p>
+
+<p>Get the sauce here:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>$ git clone git@bitbucket.org:Tristan_/tbox.git
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>So yeah, a simple implementation was not hard to make.</p>
+
+<p>I created three models for data storage:</p>
+<ul>
+  <li>Station (has_many sensors, has a location)</li>
+  <li>Sensor (has a data type and has_many sensors)</li>
+  <li>Measurement (value with belongs_to sensor)</li>
+</ul>
+
+<p>The controllers and views are just for showing the data in a pretty way with graphs and tables. So for this to work you only need to add a create method for your station. You can find an example in the <code class="language-plaintext highlighter-rouge">scripts/</code> directory. The first payload sent from the station to the hosting pc is information about all the sensors on the station.</p>
+
+<p>All the additional data sent from then on are snesor readings sent by whatever interval you set.</p>
+
+<p>But as you’d expect I found many shortcomings from this kind of sensor access.
+I needed to create a connection from the application which wasn’t a seamless experience. The connection was breaking randomly, but it was once a week at most. To set up the connection I needed to time the script and arduino connection just right because it connected over bluetooth and there were some implications.
+This is fixable by modifiying the arduino code and make it wait until the connection is not fully set up. But i just wanted to make it work.
+In the future, this project might be revisited.</p>]]></content><author><name>tristan</name></author><category term="sensors" /><category term="electronics" /><category term="arduino" /><category term="monitoring" /><summary type="html"><![CDATA[This project started out as a small test if it’s even possible to read sensor data into a MVC app like there are ThingsBoard, ThingSpeak and many more. To tune this for your own station, you need to understand a bit about Ruby on Rails and Arduino.]]></summary></entry></feed>
