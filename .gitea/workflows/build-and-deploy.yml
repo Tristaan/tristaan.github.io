@@ -10,10 +10,8 @@ jobs:
       runs-on: ubuntu-22.04
       steps:
         - uses: https://github.com/actions/checkout@v3
-        - uses: https://github.com/ruby/setup-ruby@v1
-          with:
-            ruby-version: 3.2.2
-            bundler-cache: true
+        - run: sudo apt install ruby
+        - run: gem install bundler
         - run: bundle install
 
         - name: Build
