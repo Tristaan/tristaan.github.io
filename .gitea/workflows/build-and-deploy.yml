@@ -10,10 +10,10 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: https://github.com/actions/checkout@v3
-        - uses: https://github.com/actions/setup-ruby@v1
+        - uses: https://github.com/ruby/setup-ruby@v1
           with:
             ruby-version: 3.2.2
-        - run: gem install bundler
+            bundler-cache: true
         - run: bundle install
 
         - name: Build
