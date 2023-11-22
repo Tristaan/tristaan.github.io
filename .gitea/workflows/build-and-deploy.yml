@@ -1,0 +1,30 @@
+name: Build and deploy Jekyll site to Personal Server
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: https://github.com/actions/checkout@v3
+        - uses: https://github.com/actions/setup-ruby@v1
+          with:
+            ruby-version: 3.2.2
+        - run: gem install bundler
+        - run: bundle install
+
+        - name: Build
+          run: bundle exec jekyll build
+
+        - name: Deploy
+          uses: appleboy/scp-action@v0.1.4
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            port: ${{ secrets.PORT }}
+            source: _site/*
+            target: .
